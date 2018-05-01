@@ -1,26 +1,33 @@
-import React, { Component } from 'react';
-import { render } from 'react-dom';
-import Hello from './Hello';
+// Import stylesheets
 import './style.css';
+import './src/expression-builder.css';
+import './src/expression-builder.js';
+import './data.js';
 
-class App extends Component {
-  constructor() {
-    super();
-    this.state = {
-      name: 'React'
-    };
-  }
+// Write Javascript code!
+$(function(){
+    expressionBuilder('#txt', {
+        variables: data[0]
+    });
+    expressionBuilder('#txt2', {
+        variables: data[1],
+        suggestions: "up",
+        expression: "[2] + 35"
+    });
 
-  render() {
-    return (
-      <div>
-        <Hello name={this.state.name} />
-        <p>
-          Start editing to see some magic happen :)
-        </p>
-      </div>
-    );
-  }
-}
+    $('#txt').keypress(function(){
+      setTimeout(function(){
+        let txtExp = expressionBuilder('#txt');
+        let exp = txtExp.getExpression();
+        $('.res-1-1').html("Expression: " + exp);
 
-render(<App />, document.getElementById('root'));
+        let input = txtExp.getInput();
+        $('.res-1-2').html("Input: " + input);
+      }, 100);
+    });
+
+    $('#btn-1-2').click(function(){
+      let txtExp = expressionBuilder('#txt2');
+      txtExp.setExpression($('#txt-1-2').val());
+    });
+  });
