@@ -1,10 +1,3 @@
-// Import stylesheets
-import './style.css';
-import './src/expression-builder.css';
-import './src/expression-builder.js';
-import './data.js';
-
-// Write Javascript code!
 $(function(){
     expressionBuilder('#txt', {
         variables: data[0]
