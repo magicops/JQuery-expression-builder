@@ -1,16 +1,16 @@
-.exp-container {
+﻿.exp-container {
     position: relative;
 }
- 
+
     .exp-container input {
         padding-left: 23px;
     }
- 
+
         .exp-container input.in-valid-char {
-            border-color: red;
-            outline-color: red;
+            border-color: orange !important;
+            box-shadow: inset 0px 1px 1px rgba(0,0,0,0.075), 0px 0px 8px orange !important;
         }
- 
+
     .exp-container .exp-notification {
         width: 20px;
         height: 20px;
@@ -18,7 +18,7 @@
         top: 9px;
         left: 5px;
     }
- 
+
         .exp-container .exp-notification span {
             display: none;
             color: #fff;
@@ -29,32 +29,36 @@
             font-size: 10px;
             text-align: center;
         }
- 
- 
+
+
         .exp-container .exp-notification .ok {
             background-color: #2b9223;
         }
- 
+
         .exp-container .exp-notification .error {
             background-color: #ba3636;
         }
- 
-        .exp-container .exp-notification.invalid .ok {
-            display: none;
-        }
- 
-        .exp-container .exp-notification.invalid .error {
-            display: block;
-        }
- 
-        .exp-container .exp-notification.valid .ok {
-            display: block;
-        }
- 
-        .exp-container .exp-notification.valid .error {
-            display: none;
-        }
- 
+
+    .exp-container.invalid input {
+        border-color: #ba3636;
+    }
+
+    .exp-container.invalid .exp-notification .ok {
+        display: none;
+    }
+
+    .exp-container.invalid .exp-notification .error {
+        display: block;
+    }
+
+    .exp-container.valid .exp-notification .ok {
+        display: block;
+    }
+
+    .exp-container.valid .exp-notification .error {
+        display: none;
+    }
+
     .exp-container .exp-suggestions {
         border-color: red;
         background-color: white;
@@ -66,22 +70,22 @@
         display: none;
         z-index: 1150;
     }
- 
+
         .exp-container .exp-suggestions.up {
             bottom: 36px;
         }
- 
+
         .exp-container .exp-suggestions .exp-suggestion-item {
             cursor: pointer;
             width: 100%;
             padding: 3px 5px;
-            min-width: 200px;
+            min-width: 800px;
         }
- 
+
             .exp-container .exp-suggestions .exp-suggestion-item.selected {
                 font-weight: bold;
             }
- 
+
             .exp-container .exp-suggestions .exp-suggestion-item:hover {
                 background-color: #337ab7;
                 color: white;

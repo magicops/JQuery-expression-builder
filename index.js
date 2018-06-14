@@ -1,26 +1,19 @@
-$(function(){
-    expressionBuilder('#txt', {
-        variables: data[0]
-    });
-    expressionBuilder('#txt2', {
-        variables: data[1],
-        suggestions: "up",
-        expression: "[2] + 35"
-    });
+var express = require('express');
+var path = require('path');
+var open = require('open');
+var webpack = require('webpack');
 
-    $('#txt').keypress(function(){
-      setTimeout(function(){
-        let txtExp = expressionBuilder('#txt');
-        let exp = txtExp.getExpression();
-        $('.res-1-1').html("Expression: " + exp);
+const port = 3000;
+const app = express();
 
-        let input = txtExp.getInput();
-        $('.res-1-2').html("Input: " + input);
-      }, 100);
-    });
 
-    $('#btn-1-2').click(function(){
-      let txtExp = expressionBuilder('#txt2');
-      txtExp.setExpression($('#txt-1-2').val());
-    });
-  });
+app.get('/', function (req, res) {
+    res.sendFile(path.join(__dirname, 'demo/index.html'));
+});
+
+app.listen(port, function (err) {
+    if (err)
+        console.log(err);
+    else
+        open('http://localhost:' + port);
+});
