@@ -362,7 +362,7 @@ function expressionBuilder(selector, options) {
             notificaiton.removeAttr('title');
         }
         catch (ex) {
-            console.log(ex.message);
+            console.warn("exp.js validation: " + ex.message);
             notificaiton.parent().addClass('invalid').removeClass('valid');
             notificaiton.attr('title', ex.message);
             return false;

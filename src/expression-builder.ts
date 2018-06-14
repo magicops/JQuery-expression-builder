@@ -8,7 +8,7 @@ interface HTMLElement {
 }
 
 function expressionBuilder(selector: string | JQuery, options?: any) {
-
+    
     if (!selector)
         throw new Error("The selector is undefined. It should be a string selctor or a JQuery DOM element.")
 
@@ -527,7 +527,7 @@ function expressionBuilder(selector: string | JQuery, options?: any) {
             notificaiton.parent().removeClass('invalid').addClass('valid');
             notificaiton.removeAttr('title');
         } catch (ex) {
-            console.log(ex.message);
+            console.warn("exp.js validation: " + ex.message);
             notificaiton.parent().addClass('invalid').removeClass('valid');
             notificaiton.attr('title', ex.message);
             return false;
