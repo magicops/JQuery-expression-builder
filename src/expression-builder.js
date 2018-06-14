@@ -1,4 +1,5 @@
 //Author: Majid Akbari
+/// <reference path="jquery.d.ts" />
 function expressionBuilder(selector, options) {
     if (!selector)
         throw new Error("The selector is undefined. It should be a string selctor or a JQuery DOM element.");

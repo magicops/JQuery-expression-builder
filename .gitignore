@@ -6,3 +6,5 @@
 *.suo
 *.map
 /.vs/
+.vs/
+/.vs

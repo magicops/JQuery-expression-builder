@@ -1,5 +1,7 @@
 ﻿//Author: Majid Akbari
 
+/// <reference path="jquery.d.ts" />
+
 interface HTMLElement {
     selectionStart: any,
     setSelectionRange: any;
