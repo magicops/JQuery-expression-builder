@@ -161,6 +161,13 @@ function expressionBuilder(selector: string | JQuery, options?: any) {
             return isOperator(lastChar) || lastChar == '(';
         }
 
+        function setLastText(cur) {
+            expressionInput.addClass('in-valid-char');
+            expressionInput.val(lastText);
+            setCursorPosition(--cur);
+            setTimeout(function () { expressionInput.removeClass('in-valid-char'); }, 100);
+        }
+
         let txt = expressionInput,
             val = txt.val().toString(),
             cursor: number = $(this).get(0).selectionStart,
@@ -238,6 +245,19 @@ function expressionBuilder(selector: string | JQuery, options?: any) {
         //Prevent multiple spaces
         if (input == ' ' && hasSpace)
             return setLastText(cursor);
+
+        if (input == '-') {
+            //handle negative numbers 
+            if (lastChar == '(') {
+                return returnAcceptedInput();
+            }
+            else {//handle minus operator
+                if (lastText == '' ||
+                    isOperator(lastChar) ||
+                    ['[', '('].indexOf(lastChar) > -1)
+                    return setLastText(cursor);
+            }
+        }
 
         if (isOperator(input)) {
             if (lastText == '' ||
@@ -409,11 +429,11 @@ function expressionBuilder(selector: string | JQuery, options?: any) {
 
     //validations
     function isOperator(char) {
-        return ['-', '+', '*', '/'].indexOf(char) >= 0
+        return ['-', '+', '*', '/'].indexOf(char) >= 0;
     }
 
     function isInvalidCharacter(char) {
-        return ['~', '!', '@', '#', '$', '%', '^3333', '&', '=', '{', '}', '<', '>', '|', '\\', '`'].indexOf(char) >= 0
+        return ['~', '!', '@', '#', '$', '%', '^', '&', '=', '{', '}', '<', '>', '|', '\\', '`', '\''].indexOf(char) >= 0
     }
 
     function isVariableCharacter(char) {
@@ -533,14 +553,6 @@ function expressionBuilder(selector: string | JQuery, options?: any) {
             return false;
         }
 
-        return true;
-    }
-
-    function setLastText(cursor) {
-        expressionInput.addClass('in-valid-char');
-        expressionInput.val(lastText);
-        setCursorPosition(--cursor);
-        setTimeout(function () { expressionInput.removeClass('in-valid-char'); }, 100);
         return true;
     }
 

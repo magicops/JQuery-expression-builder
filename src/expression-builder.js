@@ -99,6 +99,12 @@ function expressionBuilder(selector, options) {
                 return false;
             return isOperator(lastChar) || lastChar == '(';
         }
+        function setLastText(cur) {
+            expressionInput.addClass('in-valid-char');
+            expressionInput.val(lastText);
+            setCursorPosition(--cur);
+            setTimeout(function () { expressionInput.removeClass('in-valid-char'); }, 100);
+        }
         var txt = expressionInput, val = txt.val().toString(), cursor = $(this).get(0).selectionStart, lastChar = "", input = lastText.length > val.length ? '\b' : val[cursor - 1], hasSpace = false, _inVariable = false, _inString = false;
         if (isPaste) {
             isPaste = false;
@@ -152,6 +158,18 @@ function expressionBuilder(selector, options) {
         //Prevent multiple spaces
         if (input == ' ' && hasSpace)
             return setLastText(cursor);
+        if (input == '-') {
+            //handle negative numbers 
+            if (lastChar == '(') {
+                return returnAcceptedInput();
+            }
+            else {
+                if (lastText == '' ||
+                    isOperator(lastChar) ||
+                    ['[', '('].indexOf(lastChar) > -1)
+                    return setLastText(cursor);
+            }
+        }
         if (isOperator(input)) {
             if (lastText == '' ||
                 isOperator(lastChar) ||
@@ -281,7 +299,7 @@ function expressionBuilder(selector, options) {
         return ['-', '+', '*', '/'].indexOf(char) >= 0;
     }
     function isInvalidCharacter(char) {
-        return ['~', '!', '@', '#', '$', '%', '^3333', '&', '=', '{', '}', '<', '>', '|', '\\', '`'].indexOf(char) >= 0;
+        return ['~', '!', '@', '#', '$', '%', '^', '&', '=', '{', '}', '<', '>', '|', '\\', '`', '\''].indexOf(char) >= 0;
     }
     function isVariableCharacter(char) {
         if (char == '_')
@@ -367,13 +385,6 @@ function expressionBuilder(selector, options) {
             notificaiton.attr('title', ex.message);
             return false;
         }
-        return true;
-    }
-    function setLastText(cursor) {
-        expressionInput.addClass('in-valid-char');
-        expressionInput.val(lastText);
-        setCursorPosition(--cursor);
-        setTimeout(function () { expressionInput.removeClass('in-valid-char'); }, 100);
         return true;
     }
     function setCursorPosition(position) {
