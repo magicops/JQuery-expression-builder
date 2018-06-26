@@ -1,7 +1,7 @@
 # JQuery-expression-builder
 JQuery plugin offering an interface to create arithmetic expressions
 
-```Javascript
+```
     _______  __ ____         _______
    / ____/ |/ // __ \       / / ___/
   / __/  |   // /_/ /  __  / /\__ \ 
