@@ -248,14 +248,9 @@ function expressionBuilder(selector: string | JQuery, options?: any) {
 
         if (input == '-') {
             //handle negative numbers 
-            if (lastChar == '(') {
+            if (lastText == '' ||
+                ['(', '*', '/'].indexOf(lastChar) > -1) {
                 return returnAcceptedInput();
-            }
-            else {//handle minus operator
-                if (lastText == '' ||
-                    isOperator(lastChar) ||
-                    ['[', '('].indexOf(lastChar) > -1)
-                    return setLastText(cursor);
             }
         }
 
@@ -433,7 +428,7 @@ function expressionBuilder(selector: string | JQuery, options?: any) {
     }
 
     function isInvalidCharacter(char) {
-        return ['~', '!', '@', '#', '$', '%', '^', '&', '=', '{', '}', '<', '>', '|', '\\', '`', '\''].indexOf(char) >= 0
+        return ['~', '!', '@', '#', '$', '%', '^', '&', '=', '{', '}', '<', '>', '|', '\\', '`', '\'', ';', ':'].indexOf(char) >= 0
     }
 
     function isVariableCharacter(char) {

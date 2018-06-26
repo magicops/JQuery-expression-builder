@@ -160,14 +160,9 @@ function expressionBuilder(selector, options) {
             return setLastText(cursor);
         if (input == '-') {
             //handle negative numbers 
-            if (lastChar == '(') {
+            if (lastText == '' ||
+                ['(', '*', '/'].indexOf(lastChar) > -1) {
                 return returnAcceptedInput();
-            }
-            else {
-                if (lastText == '' ||
-                    isOperator(lastChar) ||
-                    ['[', '('].indexOf(lastChar) > -1)
-                    return setLastText(cursor);
             }
         }
         if (isOperator(input)) {
@@ -299,7 +294,7 @@ function expressionBuilder(selector, options) {
         return ['-', '+', '*', '/'].indexOf(char) >= 0;
     }
     function isInvalidCharacter(char) {
-        return ['~', '!', '@', '#', '$', '%', '^', '&', '=', '{', '}', '<', '>', '|', '\\', '`', '\''].indexOf(char) >= 0;
+        return ['~', '!', '@', '#', '$', '%', '^', '&', '=', '{', '}', '<', '>', '|', '\\', '`', '\'', ';', ':'].indexOf(char) >= 0;
     }
     function isVariableCharacter(char) {
         if (char == '_')
