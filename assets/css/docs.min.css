@@ -173,11 +173,11 @@ body {
   color: #cdbfe3;
   text-align: center;
   text-shadow: 0 1px 0 rgba(0,0,0,.1);
-  background-color: #6f5499;
-  background-image: -webkit-linear-gradient(top,#327890 0,#6f5499 100%);
-  background-image: linear-gradient(to bottom,#327890 0,#6f5499 100%);
+  background-color: #62a3b9;
+  background-image: -webkit-linear-gradient(top,#327890 0,#62a3b9 100%);
+  background-image: linear-gradient(to bottom,#327890 0,#62a3b9 100%);
   background-repeat: repeat-x;
-  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#327890', endColorstr='#6F5499', GradientType=0)
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#327890', endColorstr='#62a3b9', GradientType=0)
 }
 
   .bs-docs-masthead .bs-docs-booticon {
