@@ -42,8 +42,8 @@ header:
 
 # google analytics
 analytics:
-  account:
-  domain:
+  account: UA-121479203-1
+  domain: exp.js.org
 
 # github buttons
 githubButton:
