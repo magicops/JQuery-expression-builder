@@ -17,7 +17,7 @@ favicon: png
 # download.cdn.img is optional
 download:
   popup: false
-  url: https://github.com/mistic100/jekyll-bootstrap-doc/archive/gh-pages.zip
+  url: https://github.com/majid-akbari/JQuery-expression-builder
 
 # set this to true to replace the generated header navbar by _includes/navbar.html
 customNavBar: false
@@ -61,9 +61,6 @@ twitter:
 facebook:
   enabled: true
   profileUrl:
-
-
-exclude: ['bower.json', 'Gemfile.lock', 'Gemfile']
 
 gems:
   - jekyll-mentions
