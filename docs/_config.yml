@@ -10,24 +10,14 @@ licenseUrl: http://opensource.org/licenses/MIT
 # extension of the favicon, blank to disable
 favicon: png
 
-theme: jekyll-theme-cayman
-
-trianglify: true
-
 # download button
 # if download.popup is true, the download button will open a popup with several download options
 # otherwise it will simply open download.url and other options are ignored
 # if download.popup is true, any option is optional
 # download.cdn.img is optional
 download:
-  popup: true
+  popup: false
   url: https://github.com/mistic100/jekyll-bootstrap-doc/archive/gh-pages.zip
-  bower: jekyll-bootstrap-doc
-  npm: jekyll-bootstrap-doc
-  cdn:
-    url: https://cdnjs.com/libraries/jekyll-bootstrap-doc
-    img: https://alemangui.github.io/pizzicato/img/cdnjs.svg
-    name: cdnjs
 
 # set this to true to replace the generated header navbar by _includes/navbar.html
 customNavBar: false
@@ -35,21 +25,19 @@ customNavBar: false
 # list of additional links on the right of the top menu
 headerLinks:
   - title: GitHub
-    url: https://github.com/mistic100/jekyll-bootstrap-doc
-  - title: StrangePlanet
-    url: http://www.strangeplanet.fr
+    url: https://github.com/majid-akbari/JQuery-expression-builder
 
 # list if additional links on the footer
 footerLinks:
   - title: GitHub
-    url: https://github.com/mistic100/jekyll-bootstrap-doc
+    url: https://github.com/majid-akbari/JQuery-expression-builder
   - title: Issues
-    url: https://github.com/mistic100/jekyll-bootstrap-doc/issues?state=open
+    url: https://github.com/majid-akbari/JQuery-expression-builder/issues
 
 # header
 header:
-  color1: "#080331"
-  color2: "#673051"
+  color1: "#72c1db"
+  color2: "#1f86a8"
   trianglify: true
 
 # google analytics
