@@ -8,7 +8,7 @@ version: 0.4.2
 license: MIT License
 licenseUrl: http://opensource.org/licenses/MIT
 # extension of the favicon, blank to disable
-favicon: png
+favicon: ico
 
 # download button
 # if download.popup is true, the download button will open a popup with several download options
