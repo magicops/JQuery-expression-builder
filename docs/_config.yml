@@ -12,6 +12,8 @@ favicon: png
 
 theme: jekyll-theme-cayman
 
+trianglify: true
+
 # download button
 # if download.popup is true, the download button will open a popup with several download options
 # otherwise it will simply open download.url and other options are ignored
