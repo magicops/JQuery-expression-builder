@@ -29,7 +29,7 @@ body {
 .btn-outline-inverse {
   color: #fff;
   background-color: transparent;
-  border-color: #cdbfe3
+  border-color: #cadce2
 }
 
   .btn-outline-inverse:hover, .btn-outline-inverse:focus, .btn-outline-inverse:active {
@@ -70,7 +70,7 @@ body {
 
 .bs-docs-booticon-outline {
   background-color: transparent;
-  border: 1px solid #cdbfe3
+  border: 1px solid #cadce2
 }
 
 .bs-docs-nav {
@@ -170,7 +170,7 @@ body {
 .bs-docs-masthead, .bs-docs-header {
   position: relative;
   padding: 30px 15px;
-  color: #cdbfe3;
+  color: #cadce2;
   text-align: center;
   text-shadow: 0 1px 0 rgba(0,0,0,.1);
   background-color: #62a3b9;
