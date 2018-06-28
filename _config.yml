@@ -36,8 +36,8 @@ footerLinks:
 
 # header
 header:
-  color1: "#72c1db"
-  color2: "#115e77"
+  color1: "#4a9ab5"
+  color2: "#0e3f50"
   trianglify: true
 
 # google analytics
