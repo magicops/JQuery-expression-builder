@@ -199,7 +199,7 @@ body {
   .bs-docs-masthead .version {
     margin-top: -15px;
     margin-bottom: 30px;
-    color: #105871
+    color: #cadce2
   }
 
   .bs-docs-masthead .btn {
@@ -286,7 +286,7 @@ body {
   line-height: 16px !important;
   text-align: left;
   background: transparent !important;
-  border: solid #866ab3 !important;
+  border: solid #39a5ca !important;
   border-width: 1px 0 !important
 }
 
