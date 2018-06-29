@@ -17,6 +17,9 @@ var funcs = {
     },
     Substr: function (str, from) {
         return str.substr(from);
+    },
+    majid: function () {
+        return "majid";
     }
 };
 //abstract base-class
@@ -67,14 +70,9 @@ var FuncNode = /** @class */ (function (_super) {
         var v = this.node.compute(ctx);
         var vars = v instanceof Array ? v : [v];
         var computes = vars
-            .filter(function (v) { return v instanceof GraphNode; }) //remove ,
-            .map(function (v) { return v.compute(ctx); }); //compute each one
+            .filter(function (v) { return v != ","; }) //remove ,
+            .map(function (v) { return v instanceof GraphNode ? v.compute(ctx) : v; }); //compute each one
         var func = funcs[this.op];
-        if (!func) {
-            throw new Error(this.op + " is not defined.");
-        }
-        if (computes.length != func.length)
-            throw new Error(this.op + " requires " + func.length + " argument(s)");
         return func.apply(func, computes);
     };
     FuncNode.prototype.toString = function () {
@@ -144,6 +142,7 @@ function parse(str) {
             token = new ValueNode(+number);
         }
         else if (str) {
+            str = str.replace(/'/g, '"');
             token = new ValueNode(JSON.parse(str));
             //}else if(bool){
             //  token = new ValueNode(bool === "true");
@@ -173,7 +172,17 @@ function parse(str) {
     }
     for (var i, j; (i = tokens.lastIndexOf("(")) > -1 && (j = tokens.indexOf(")", i)) > -1;) {
         if (tokens[i - 1] instanceof PropertyNode) {
-            var funcNode = new FuncNode(tokens[i - 1], process(tokens.slice(i + 1, j)));
+            var funcParam = i + 1 == j ? new ValueNode([]) : process(tokens.slice(i + 1, j));
+            var op = tokens[i - 1];
+            var vars = funcParam.value
+                .filter(function (v) { return v != ","; }); //remove ,
+            var func = funcs[op];
+            if (!func) {
+                throw new Error(op + " is not defined.");
+            }
+            if (vars.length != func.length)
+                throw new Error(op + " requires " + func.length + " argument(s)");
+            var funcNode = new FuncNode(tokens[i - 1], funcParam);
             tokens.splice(i - 1, j + 2 - i, funcNode);
         }
         else
@@ -190,8 +199,12 @@ function process(tokens) {
             tokens.splice(i - 1, 3, new BinaryNode(token, tokens[i - 1], tokens[i + 1]));
         }
     });
-    if (tokens.indexOf(",") > -1)
+    if (tokens.indexOf(",") > -1) {
+        var commaCount = tokens.filter(function (t) { return t == ","; }).length, argCount = commaCount * 2 + 1;
+        if (tokens.length != argCount)
+            throw new Error("Syntax error for the arguments: " + tokens.filter(function (t) { return t != ","; }).join(","));
         tokens = [new ValueNode(tokens)];
+    }
     if (tokens.length !== 1) {
         console.log("error: ", tokens.slice());
         throw new Error("something went wrong");
@@ -207,8 +220,6 @@ function main() {
     var reg = new RegExp([
         //properties
         /\[[a-zA-Z0-9$_]*\]+/.source,
-        //space
-        /\ |\s/.source,
     ].map(function (s) { return "(" + s + ")"; }).join("|"), "g");
     var replacer = function (token, prop, space, string, func) {
         if (prop) {
@@ -223,19 +234,30 @@ function main() {
         //  tokens.funcs.push(func);
         //  return "func" + tokens.funcs.length;
         //}
-        if (space)
-            return "";
+        //if (space)
+        //  return "";
     };
     var str = document.getElementById('formula').value, result = str.replace(reg, replacer);
     document.getElementById('pre').innerHTML = JSON.stringify(tokens, null, 2);
-    var tree = parse(result);
     var data = {
-        prop1: 2,
-        func1: 3
+        "name_2": "Majid Akbari",
+        x: 6
     };
-    for (var i = 0; i < tokens.strs.length; i++) {
-        data["str" + (i + 1)] = tokens.strs[i];
+    var tree;
+    try {
+        tree = parse(result);
     }
+    catch (ex) {
+        alert(ex);
+    }
+    //for (var i = 0; i < tokens.strs.length; i++) {
+    //  data["str" + (i + 1)] = tokens.strs[i];
+    //}
+    for (var i = 0; i < tokens.props.length; i++) {
+        data["prop" + (i + 1)] = data[tokens.props[i]];
+    }
+    if (!tree)
+        return;
     var c = tree.compute(data);
     document.getElementById('result').innerHTML = result + " = " + c + "<br />" + tree.toString();
     //console.log(JSON.stringify(tree, null, 2));
