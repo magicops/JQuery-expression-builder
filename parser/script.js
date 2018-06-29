@@ -8,6 +8,17 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+var funcs = {
+    Add: function (x, y) {
+        return x + y;
+    },
+    Sub: function (x, y) {
+        return x - y;
+    },
+    Substr: function (str, from) {
+        return str.substr(from);
+    }
+};
 //abstract base-class
 var GraphNode = /** @class */ (function () {
     function GraphNode() {
@@ -53,28 +64,24 @@ var FuncNode = /** @class */ (function (_super) {
         return _this;
     }
     FuncNode.prototype.compute = function (ctx) {
-        var vars = this.node.compute(ctx);
+        var v = this.node.compute(ctx);
+        var vars = v instanceof Array ? v : [v];
         var computes = vars
             .filter(function (v) { return v instanceof GraphNode; }) //remove ,
-            .map(function (v) { return v.compute(ctx); }); //compute eachone
-        switch (this.op) {
-            case "Add":
-                if (computes.length != 2)
-                    throw new Error(this.op + " requires two arguments");
-                return computes[0] + computes[1];
-            case "Sub":
-                if (computes.length != 2)
-                    throw new Error(this.op + " requires two arguments");
-                return computes[0] - computes[1];
+            .map(function (v) { return v.compute(ctx); }); //compute each one
+        var func = funcs[this.op];
+        if (!func) {
+            throw new Error(this.op + " is not defined.");
         }
-        throw new Error("operator not implemented '" + this.op + "'");
+        if (computes.length != func.length)
+            throw new Error(this.op + " requires " + func.length + " argument(s)");
+        return func.apply(func, computes);
     };
     FuncNode.prototype.toString = function () {
         return "( " + this.op + " " + this.node.toString() + " )";
     };
     return FuncNode;
 }(GraphNode));
-FuncNode.operators = ["Add", "Sub"];
 var BinaryNode = /** @class */ (function (_super) {
     __extends(BinaryNode, _super);
     function BinaryNode(op, l, r) {
@@ -105,9 +112,7 @@ var BinaryNode = /** @class */ (function (_super) {
     };
     return BinaryNode;
 }(GraphNode));
-BinaryNode.operators = [
-    "*", "/", "+", "-"
-];
+BinaryNode.operators = ["*", "/", "+", "-"];
 function escapeForRegex(str) {
     return String(str).replace(/[.*+?^=!:${}()|[\]\/\\]/g, '\\$&');
 }
@@ -116,7 +121,7 @@ var tokenParser = new RegExp([
     //numbers
     /\d+(?:\.\d*)?|\.\d+/.source,
     //string-literal
-    //  /["](?:\\[\s\S]|[^"])+["]|['](?:\\[\s\S]|[^'])+[']/.source,
+    /["](?:\\[\s\S]|[^"])+["]|['](?:\\[\s\S]|[^'])+[']/.source,
     //booleans
     //"true|false",
     //operators
@@ -134,11 +139,12 @@ var tokenParser = new RegExp([
 function parse(str) {
     var tokens = [];
     //abusing str.replace() as a RegExp.forEach
-    str.replace(tokenParser, function (token, number, op, property) {
+    str.replace(tokenParser, function (token, number, str, op, property) {
         if (number) {
             token = new ValueNode(+number);
-            //}else if(string){
-            //  token = new ValueNode(JSON.parse(string));
+        }
+        else if (str) {
+            token = new ValueNode(JSON.parse(str));
             //}else if(bool){
             //  token = new ValueNode(bool === "true");
         }
@@ -166,7 +172,7 @@ function parse(str) {
         }
     }
     for (var i, j; (i = tokens.lastIndexOf("(")) > -1 && (j = tokens.indexOf(")", i)) > -1;) {
-        if (FuncNode.operators.indexOf(tokens[i - 1]) > -1) {
+        if (tokens[i - 1] instanceof PropertyNode) {
             var funcNode = new FuncNode(tokens[i - 1], process(tokens.slice(i + 1, j)));
             tokens.splice(i - 1, j + 2 - i, funcNode);
         }
@@ -203,18 +209,16 @@ function main() {
         /\[[a-zA-Z0-9$_]*\]+/.source,
         //space
         /\ |\s/.source,
-        //string-literal
-        /["](?:\\[\s\S]|[^"])+["]/.source,
     ].map(function (s) { return "(" + s + ")"; }).join("|"), "g");
     var replacer = function (token, prop, space, string, func) {
         if (prop) {
             tokens.props.push(prop.substring(1, prop.length - 1));
             return "prop" + tokens.props.length;
         }
-        if (string) {
-            tokens.strs.push(string.substring(1, string.length - 1));
-            return "str" + tokens.strs.length;
-        }
+        //if (string) {
+        //  tokens.strs.push(string.substring(1, string.length - 1));
+        //  return "str" + tokens.strs.length;
+        //}
         //if (func) {
         //  tokens.funcs.push(func);
         //  return "func" + tokens.funcs.length;
@@ -226,10 +230,12 @@ function main() {
     document.getElementById('pre').innerHTML = JSON.stringify(tokens, null, 2);
     var tree = parse(result);
     var data = {
-        str1: 1,
         prop1: 2,
         func1: 3
     };
+    for (var i = 0; i < tokens.strs.length; i++) {
+        data["str" + (i + 1)] = tokens.strs[i];
+    }
     var c = tree.compute(data);
     document.getElementById('result').innerHTML = result + " = " + c + "<br />" + tree.toString();
     //console.log(JSON.stringify(tree, null, 2));
