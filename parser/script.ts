@@ -75,7 +75,7 @@ var data = {
         this.value = value;
       }
       compute() { return this.value; }
-      toString() { return JSON.stringify(this.value); }
+      toString() { return this.value instanceof Array ? this.value.filter(v => v != ",") : this.value; }
     }
 
     class PropertyNode extends GraphNode {
@@ -309,7 +309,7 @@ var data = {
       getExpressionTree: function () {
         return _getExpressionTree();
       },
-      runExpressiontree: function (data) {
+      runExpressionTree: function (data) {
         let tree = _getExpressionTree();
         return tree.compute(data);
       },
@@ -336,14 +336,13 @@ function main() {
   let v = p.validate();
 
   if (v !== true) {
-    console.error(v.message);
-    document.getElementById('result').innerHTML = '';
+    document.getElementById('result').innerHTML = v.message;
     return;
   }
 
 
   let tree = p.getExpressionTree();
-  let result = 1;//p.runExpressionTree(data);
+  let result = p.runExpressionTree(data);
   document.getElementById('result').innerHTML = $('#formula').val() + " = " + result + "<br />" + tree.toString();
   //console.log(JSON.stringify(tree, null, 2));
 }

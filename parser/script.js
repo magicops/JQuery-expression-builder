@@ -65,7 +65,7 @@ var data = {
                 return _this;
             }
             ValueNode.prototype.compute = function () { return this.value; };
-            ValueNode.prototype.toString = function () { return JSON.stringify(this.value); };
+            ValueNode.prototype.toString = function () { return this.value instanceof Array ? this.value.filter(function (v) { return v != ","; }) : this.value; };
             return ValueNode;
         }(GraphNode));
         var PropertyNode = /** @class */ (function (_super) {
@@ -261,7 +261,7 @@ var data = {
             getExpressionTree: function () {
                 return _getExpressionTree();
             },
-            runExpressiontree: function (data) {
+            runExpressionTree: function (data) {
                 var tree = _getExpressionTree();
                 return tree.compute(data);
             },
@@ -282,12 +282,11 @@ function main() {
     var p = $('#formula').parser();
     var v = p.validate();
     if (v !== true) {
-        console.error(v.message);
-        document.getElementById('result').innerHTML = '';
+        document.getElementById('result').innerHTML = v.message;
         return;
     }
     var tree = p.getExpressionTree();
-    var result = 1; //p.runExpressionTree(data);
+    var result = p.runExpressionTree(data);
     document.getElementById('result').innerHTML = $('#formula').val() + " = " + result + "<br />" + tree.toString();
     //console.log(JSON.stringify(tree, null, 2));
 }
