@@ -2,7 +2,8 @@
 
 interface Parser {
   getExpressionTree();
-  runExpressiontree(data: any);
+  runExpressionTree(data: any);
+  validate(): any;
 }
 
 interface JQuery {
@@ -14,7 +15,7 @@ var data = {
   x: 6
 };
 
-jQuery(function () {
+(function ($) {
 
   $.fn.extend({
     parser: function (options: any) {
@@ -45,6 +46,9 @@ jQuery(function () {
       },
       majid: function () {
         return "majid";
+      },
+      test: function (x) {
+        return x * 2;
       }
     };
     let defaults = {
@@ -85,8 +89,15 @@ jQuery(function () {
       }
       compute(ctx) {
 
-        if (!ctx[this.property])
-          ctx[this.property] = prompt("Enter a value for " + this.property);
+        if (!ctx[this.property]) {
+          let x = prompt("Enter a value for " + this.property),
+            y: any;
+
+          if (!isNaN(parseInt(x)))
+            y = parseInt(x);
+
+          ctx[this.property] = y;
+        }
 
         return ctx[this.property];
       }
@@ -228,12 +239,17 @@ jQuery(function () {
 
         //if before parentheses there is a property which means it is a function
         if (tokens[i - 1] instanceof PropertyNode && !(tokens[i - 1] as PropertyNode).inBrackets) {
-
-          let funcParam = i + 1 == j ? new ValueNode([]) : process(tokens.slice(i + 1, j));
           let op = tokens[i - 1].toString();
 
-          let varsLength = funcParam instanceof ValueNode ? funcParam.value
-            .filter(v => v != ",").length : 1;//remove ,
+          let funcParam = i + 1 == j ? new ValueNode([]) : process(tokens.slice(i + 1, j));
+
+          let varsLength = 1;
+
+          if (funcParam instanceof ValueNode && funcParam.value instanceof Array) {
+            varsLength = funcParam.value.filter(v => v != ",").length;//remove ,
+          }
+
+
 
           let func = options.funcs[op] as Function;
           if (!func) {
@@ -295,7 +311,15 @@ jQuery(function () {
       },
       runExpressiontree: function (data) {
         let tree = _getExpressionTree();
-        return tree.compute();
+        return tree.compute(data);
+      },
+      validate: function () {
+        try {
+          let tree = _getExpressionTree();
+          return true;
+        } catch (e) {
+          return e;
+        }
       }
     };
   }
@@ -303,14 +327,23 @@ jQuery(function () {
 
   main();
 
-});
+})(jQuery);
 
 
 function main() {
   let p = $('#formula').parser();
 
+  let v = p.validate();
+
+  if (v !== true) {
+    console.error(v.message);
+    document.getElementById('result').innerHTML = '';
+    return;
+  }
+
+
   let tree = p.getExpressionTree();
-  let result = 1;//p.runExpressiontree(data);
+  let result = 1;//p.runExpressionTree(data);
   document.getElementById('result').innerHTML = $('#formula').val() + " = " + result + "<br />" + tree.toString();
-  console.log(JSON.stringify(tree, null, 2));
+  //console.log(JSON.stringify(tree, null, 2));
 }

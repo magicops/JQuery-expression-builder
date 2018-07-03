@@ -13,7 +13,7 @@ var data = {
     "name_2": "Majid Akbari",
     x: 6
 };
-jQuery(function () {
+(function ($) {
     $.fn.extend({
         parser: function (options) {
             if (!this || this.length == 0)
@@ -38,6 +38,9 @@ jQuery(function () {
             },
             majid: function () {
                 return "majid";
+            },
+            test: function (x) {
+                return x * 2;
             }
         };
         var defaults = {
@@ -75,8 +78,12 @@ jQuery(function () {
                 return _this;
             }
             PropertyNode.prototype.compute = function (ctx) {
-                if (!ctx[this.property])
-                    ctx[this.property] = prompt("Enter a value for " + this.property);
+                if (!ctx[this.property]) {
+                    var x = prompt("Enter a value for " + this.property), y = void 0;
+                    if (!isNaN(parseInt(x)))
+                        y = parseInt(x);
+                    ctx[this.property] = y;
+                }
                 return ctx[this.property];
             };
             PropertyNode.prototype.toString = function () { return String(this.property); };
@@ -204,10 +211,12 @@ jQuery(function () {
             for (var i, j; (i = tokens.lastIndexOf("(")) > -1 && (j = tokens.indexOf(")", i)) > -1;) {
                 //if before parentheses there is a property which means it is a function
                 if (tokens[i - 1] instanceof PropertyNode && !tokens[i - 1].inBrackets) {
-                    var funcParam = i + 1 == j ? new ValueNode([]) : process(tokens.slice(i + 1, j));
                     var op = tokens[i - 1].toString();
-                    var varsLength = funcParam instanceof ValueNode ? funcParam.value
-                        .filter(function (v) { return v != ","; }).length : 1; //remove ,
+                    var funcParam = i + 1 == j ? new ValueNode([]) : process(tokens.slice(i + 1, j));
+                    var varsLength = 1;
+                    if (funcParam instanceof ValueNode && funcParam.value instanceof Array) {
+                        varsLength = funcParam.value.filter(function (v) { return v != ","; }).length; //remove ,
+                    }
                     var func = options.funcs[op];
                     if (!func) {
                         throw new Error(op + " is not defined.");
@@ -254,17 +263,32 @@ jQuery(function () {
             },
             runExpressiontree: function (data) {
                 var tree = _getExpressionTree();
-                return tree.compute();
+                return tree.compute(data);
+            },
+            validate: function () {
+                try {
+                    var tree = _getExpressionTree();
+                    return true;
+                }
+                catch (e) {
+                    return e;
+                }
             }
         };
     };
     main();
-});
+})(jQuery);
 function main() {
     var p = $('#formula').parser();
+    var v = p.validate();
+    if (v !== true) {
+        console.error(v.message);
+        document.getElementById('result').innerHTML = '';
+        return;
+    }
     var tree = p.getExpressionTree();
-    var result = 1; //p.runExpressiontree(data);
+    var result = 1; //p.runExpressionTree(data);
     document.getElementById('result').innerHTML = $('#formula').val() + " = " + result + "<br />" + tree.toString();
-    console.log(JSON.stringify(tree, null, 2));
+    //console.log(JSON.stringify(tree, null, 2));
 }
 //# sourceMappingURL=script.js.map
