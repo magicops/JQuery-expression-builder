@@ -17,5 +17,33 @@
   <div id="result"></div>
 
   <script src="script.js"></script>
+  <script>
+    function main() {
+      let p = parser($('#formula').val());
+
+      let v = p.validate();
+
+      if (v != "") {
+        document.getElementById('result').innerHTML = v;
+        return;
+      }
+
+
+      let tree = p.getExpressionTree();
+
+      var data = {
+        "name_2": "Majid Akbari",
+        x: 6
+      };
+
+      let result = p.runExpressionTree(data);
+      document.getElementById('result').innerHTML = $('#formula').val() + " = " + result + "<br />" + tree.toString();
+      //console.log(JSON.stringify(tree, null, 2));
+    }
+
+    $(function () {
+      main();
+    });
+  </script>
 </body>
 </html>
