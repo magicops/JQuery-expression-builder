@@ -1,61 +1,66 @@
 /// <reference path="../src/jquery.d.ts" />
 
 interface ParserOption {
-  useDefaultFuncs: boolean,
-  funcs: any,
-  variables: any
+  funcs?: any,
+  variables?: Array<ExpVariable>
 }
 
 let parser = function (expression: string, options?: ParserOption) {
-  let defaultFuncs = {
-    Add: function (x, y) {
-      return x + y;
-    },
-    Sub: function (x, y) {
-      return x - y;
-    },
-    Substr: function (str: string, from: number) {
-      if (!str)
-        throw new Error("String is not degined!");
-
-      if (typeof str !== "string")
-        throw new Error("The passed parameter is not a string!");
-
-      return str.substr(from);
-    },
-    majid: function () {
-      return "majid";
-    },
-    test: function (x) {
-      return x * 2;
-    }
-  };
   let defaults: ParserOption = {
-    useDefaultFuncs: true,
     funcs: {},
-    variables: {}
+    variables: []
   };
   options = $.extend({}, defaults, options);
 
-  if (options.useDefaultFuncs)
-    options.funcs = $.extend({}, defaultFuncs, options.funcs);
-
   //abstract base-class
   abstract class GraphNode {
-    abstract compute(ctx): any;
-    abstract toString(): string;
+    abstract compute(): any;
+    abstract toString(parseVariables?: boolean): string;
   }
 
   //leaf-nodes
   class ValueNode extends GraphNode {
-    public value: any;
+    value: number | string | Array<GraphNode>;
 
-    constructor(value) {
+    public getNumberValue(): number {
+      return parseInt(this.value.toString());
+    }
+
+    public getStringValue(): string {
+      return this.value.toString();
+    }
+
+    public getArrayValue(): Array<GraphNode> {
+      return this.value as Array<GraphNode>;
+    }
+
+    constructor(value: number | string | Array<GraphNode>) {
       super();
       this.value = value;
     }
     compute() { return this.value; }
-    toString() { return this.value instanceof Array ? this.value.filter(v => v != ",") : this.value; }
+    toString(parseVariables: boolean = false) {
+      if (this.value instanceof Array)
+        return this.value
+          .filter(v => !(v instanceof CommaNode))
+          .map(v => v.toString(true))
+          .join(",");
+
+      if (typeof this.value === 'string')
+        return `"${this.value}"`;
+
+      return this.value.toString();
+    }
+  }
+
+  class CommaNode extends GraphNode {
+    compute() {
+      return ","
+    }
+    toString(parseVariables?: boolean): string {
+      return ",";
+    }
+
   }
 
   class PropertyNode extends GraphNode {
@@ -67,21 +72,42 @@ let parser = function (expression: string, options?: ParserOption) {
       this.property = property;
       this.inBrackets = inBrackets;
     }
-    compute(ctx) {
+    compute() {
 
-      if (!ctx[this.property]) {
-        let x = prompt("Enter a value for " + this.property),
-          y: any;
+      let variable;
 
-        if (!isNaN(parseInt(x)))
-          y = parseInt(x);
-
-        ctx[this.property] = y;
+      for (var i = 0; i < options.variables.length; i++) {
+        let v = options.variables[i];
+        if (v.name == this.property) {
+          variable = v;
+          break;
+        }
       }
 
-      return ctx[this.property];
+      if (variable === undefined) {
+        throw new Error("Property '" + this.property + "' is not defined!");
+
+        //let x = prompt("Enter a value for " + this.property),
+        //  y: any;
+
+        //if (!isNaN(parseInt(x)))
+        //  y = parseInt(x);
+
+        //ctx[this.property] = y;
+      }
+
+      return variable.value || variable.variableId;
     }
-    toString() { return String(this.property); }
+    toString(parseVariables: boolean = false) {
+      if (parseVariables)
+        for (var i = 0; i < options.variables.length; i++) {
+          let v = options.variables[i];
+          if (v.name == this.property)
+            return `[${v.variableId}]`;
+        }
+
+      return String(this.property);
+    }
   }
 
   //tree-nodes
@@ -97,21 +123,21 @@ let parser = function (expression: string, options?: ParserOption) {
       this.name = name;
       this.node = node;
     }
-    compute(ctx) {
-      let v = this.node.compute(ctx);
+    compute() {
+      let v = this.node.compute();
 
       let vars = v instanceof Array ? v : [v];
 
       let computes = vars
         .filter(v => v != ",")//remove ,
-        .map(v => v instanceof GraphNode ? (v as GraphNode).compute(ctx) : v);//compute each one
+        .map(v => v instanceof GraphNode ? (v as GraphNode).compute() : v);//compute each one
 
       let func = options.funcs[this.name] as Function;
 
       return func.apply(func, computes);
     }
-    toString() {
-      return this.name + "(" + this.node.toString() + ")";
+    toString(parseVariables: boolean = false) {
+      return this.name + "(" + this.node.toString(parseVariables) + ")";
     }
   }
 
@@ -130,9 +156,9 @@ let parser = function (expression: string, options?: ParserOption) {
       this.left = left;
       this.right = right;
     }
-    compute(ctx) {
-      var l = this.left.compute(ctx);
-      var r = this.right.compute(ctx);
+    compute() {
+      var l = this.left.compute();
+      var r = this.right.compute();
       switch (this.op) {
         //computational operators
         case "+": return l + r;
@@ -143,8 +169,8 @@ let parser = function (expression: string, options?: ParserOption) {
       throw new Error("operator not implemented '" + this.op + "'");
     }
 
-    toString() {
-      return "( " + this.left.toString() + " " + this.op + " " + this.right.toString() + " )";
+    toString(parseVariables: boolean = false) {
+      return "( " + this.left.toString(parseVariables) + " " + this.op + " " + this.right.toString(parseVariables) + " )";
     }
   }
 
@@ -176,7 +202,7 @@ let parser = function (expression: string, options?: ParserOption) {
     /\S/.source
   ].map(s => "(" + s + ")").join("|"), "g");
 
-  function parse(str) {
+  function parse(str): GraphNode {
     var tokens = [];
     //abusing str.replace() as a RegExp.forEach
     str.replace(tokenParser, function (token, prop, number, str, op, property) {
@@ -192,7 +218,7 @@ let parser = function (expression: string, options?: ParserOption) {
       } else if (prop) {
         token = new PropertyNode(prop.substring(1, prop.length - 1), true);
       } else if (token == ',') {
-        //do nothing
+        token = new CommaNode();
       } else if (!op) {
         throw new Error("unexpected token '" + token + "'");
       }
@@ -201,14 +227,14 @@ let parser = function (expression: string, options?: ParserOption) {
 
     //detect negative numbers
     if (tokens[0] == "-" && tokens[1] instanceof ValueNode) {
-      (tokens[1] as ValueNode).value = -1 * (tokens[1] as ValueNode).value;
+      (tokens[1] as ValueNode).value = -1 * (tokens[1] as ValueNode).getNumberValue();
       tokens.splice(0, 1);
     }
 
     for (var i = 0; i < tokens.length; i++) {
       if (BinaryNode.operators.concat(['(', ',']).indexOf(tokens[i]) > -1 && tokens[i + 1] == "-" && tokens[i + 2] instanceof ValueNode) {
 
-        (tokens[i + 2] as ValueNode).value = (tokens[i + 2] as ValueNode).value * -1;
+        (tokens[i + 2] as ValueNode).value = (tokens[i + 2] as ValueNode).getNumberValue() * -1;
         tokens.splice(i + 1, 1);
       }
     }
@@ -226,7 +252,7 @@ let parser = function (expression: string, options?: ParserOption) {
         let varsLength = 1;
 
         if (funcParam instanceof ValueNode && funcParam.value instanceof Array) {
-          varsLength = funcParam.value.filter(v => v != ",").length;//remove ,
+          varsLength = funcParam.value.filter(v => !(v instanceof CommaNode)).length;//remove ,
         }
 
 
@@ -259,13 +285,21 @@ let parser = function (expression: string, options?: ParserOption) {
       }
     });
 
-    if (tokens.indexOf(",") > -1) {
+    let hasComma = false;
+    for (var j = 0; j < tokens.length; j++) {
+      if (tokens[j] instanceof CommaNode) {
+        hasComma = true;
+        break;
+      }
+    }
+
+    if (hasComma) {
 
       let commaCount = tokens.filter(t => t == ",").length,
         argCount = commaCount * 2 + 1;
 
       if (tokens.length != argCount)
-        throw new Error("Syntax error for the arguments: " + tokens.filter(t => t != ",").join(","));
+        throw new Error("Syntax error for the arguments: " + tokens.filter(t => !(t instanceof CommaNode)).join(","));
 
       tokens = [new ValueNode(tokens)];
     }
@@ -276,19 +310,27 @@ let parser = function (expression: string, options?: ParserOption) {
     }
     return tokens[0];
   }
-  
+
   return {
     getExpressionTree: function () {
-      return parse(expression);
+      try {
+        return parse(expression);
+      } catch (e) {
+        return undefined;
+      }
     },
-    runExpressionTree: function (data) {
-      let tree = parse(expression);
-      return tree.compute(data);
+    runExpressionTree: function () {
+      try {
+        let tree = parse(expression);
+        return tree.compute();
+      } catch (e) {
+        return undefined;
+      }
     },
     validate: function () {
       let result = "";
       try {
-        let tree = parse(expression);
+        parse(expression).compute();
       } catch (e) {
         result = e.message;
       }

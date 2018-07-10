@@ -19,22 +19,23 @@
   <script src="script.js"></script>
   <script>
     function main() {
+
+      var data = {
+        "1name_2": "Majid Akbari",
+        x: 6
+      };
+
+
       let p = parser($('#formula').val());
 
-      let v = p.validate();
+      let v = p.validate(data);
 
       if (v != "") {
         document.getElementById('result').innerHTML = v;
         return;
       }
 
-
       let tree = p.getExpressionTree();
-
-      var data = {
-        "name_2": "Majid Akbari",
-        x: 6
-      };
 
       let result = p.runExpressionTree(data);
       document.getElementById('result').innerHTML = $('#formula').val() + " = " + result + "<br />" + tree.toString();

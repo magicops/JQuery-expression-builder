@@ -10,7 +10,7 @@ function expressionBuilder2(selector, options) {
         options.suggestions = 'down';
     if (!options.expression)
         options.expression = '';
-    var expressionInput = typeof selector == "string" ? $(selector) : selector, lastText = '', inVariable = false, inString = false, suggestions, notificaiton, isPaste = false, variables;
+    var expressionInput = typeof selector == "string" ? $(selector) : selector, lastText = '', inVariable = false, inString = false, suggestions, notificaiton, isPaste = false, variables, parserOptions;
     //Initial for the first time
     initial();
     function initial() {
@@ -24,6 +24,8 @@ function expressionBuilder2(selector, options) {
             expressionInput.attr('exp-id', id);
             variables = options.variables || [];
             expressionInput.data('variables', variables);
+            options.funcs = options.funcs || [];
+            expressionInput.data('funcs', options.funcs);
             var parent_1 = $("<div class='exp-container' exp-id='" + id + "'></div>");
             expressionInput.parent().append(parent_1);
             parent_1
@@ -50,15 +52,25 @@ function expressionBuilder2(selector, options) {
             notificaiton = $('.exp-container .exp-notification[exp-id=' + id + "]");
             if (!variables)
                 variables = expressionInput.data('variables');
+            if (!options.funcs)
+                options.funcs = expressionInput.data('funcs');
         }
+        parserOptions = {
+            funcs: options.funcs,
+            variables: variables
+        };
     }
     function onPaste() {
         isPaste = true;
         setTimeout(function () { isPaste = false; validation(); }, 100);
     }
     function onKeydown(e) {
-        if (!inVariable)
-            return;
+        //if (!inVariable)
+        //  return;
+        if (e.key == 'Esc') {
+            hideSuggestions();
+            return false;
+        }
         if (['Up', 'Down', 'ArrowUp', 'ArrowDown'].indexOf(e.key) > -1) {
             var index = parseInt(suggestions.attr('data-index')), divs = suggestions.find('div.exp-suggestion-item'), isUp = e.key == 'Up' || e.key == 'ArrowUp';
             if (divs.length == 0)
@@ -247,8 +259,12 @@ function expressionBuilder2(selector, options) {
         var text = expressionInput.val().toString(), textCursor = $(this).get(0).selectionStart, lastInput = lastText.length > text.length ? '\b' : text[textCursor - 1];
         if (1 > 2)
             forceCharInput(text, textCursor, lastInput);
-        if (isVariableCharacter(lastInput)) {
-            showSuggestions(text, textCursor);
+        else {
+            if (isVariableCharacter(lastInput)) {
+                showSuggestions(text, textCursor);
+            }
+            lastText = text;
+            validation();
         }
     }
     function setExpresionToInput(expression) {
@@ -328,81 +344,18 @@ function expressionBuilder2(selector, options) {
     function isNumber(char) {
         return char >= '0' && char <= '9';
     }
-    function parseInput() {
-        var text = expressionInput.val().toString(), formula = '', expression = '', inVariable = false, _inString = false, varName = '', varNames = [], stringText = '', strings = [];
-        for (var i = 0; i < text.length; i++) {
-            var input = text[i];
-            //check string input
-            if (input == '"' && !_inString) {
-                _inString = true;
-                continue;
-            }
-            if (input == '"' && _inString) {
-                strings.push(stringText);
-                formula += '"A"';
-                expression += '"' + stringText + '"';
-                stringText = '';
-                _inString = false;
-                continue;
-            }
-            if (_inString) {
-                stringText += input;
-                continue;
-            }
-            //end of check string input
-            if (isOperator(input) || ['(', ')'].indexOf(input) > -1) {
-                formula += input;
-                expression += input;
-                continue;
-            }
-            if (input == '[') {
-                inVariable = true;
-                continue;
-            }
-            if (input == ']' && inVariable) {
-                varNames.push(varName);
-                var variable = getVariable(varName);
-                expression += variable ? "[" + variable.variableId + "]" : "[0]";
-                formula += 9;
-                varName = '';
-                inVariable = false;
-                continue;
-            }
-            if (inVariable) {
-                varName += input;
-                continue;
-            }
-            formula += input;
-            expression += input;
-        }
-        var x = {
-            formula: formula,
-            expression: expression,
-            variables: varNames,
-            strings: strings
-        };
-        //console.log(x)
-        return x;
-    }
     function validation() {
-        var result = parseInput();
-        try {
-            if (result.expression == '')
-                throw new Error("expression is empty!");
-            for (var i = 0; i < result.variables.length; i++)
-                if (!getVariable(result.variables[i]))
-                    throw new Error(result.variables[i] + " does not exists!");
-            eval(result.formula);
+        var text = expressionInput.val().toString();
+        var v = parser(text, parserOptions).validate();
+        if (v == '') {
             notificaiton.parent().removeClass('invalid').addClass('valid');
             notificaiton.removeAttr('title');
+            return true;
         }
-        catch (ex) {
-            console.warn("exp.js validation: " + ex.message);
-            notificaiton.parent().addClass('invalid').removeClass('valid');
-            notificaiton.attr('title', ex.message);
-            return false;
-        }
-        return true;
+        console.warn("exp.js validation: " + v);
+        notificaiton.parent().addClass('invalid').removeClass('valid');
+        notificaiton.attr('title', v);
+        return false;
     }
     function setCursorPosition(position) {
         expressionInput.get(0).setSelectionRange(position, position);
@@ -415,22 +368,45 @@ function expressionBuilder2(selector, options) {
         var varName = '', startIndex = 0;
         for (var j = cursor; j > 0; j--) {
             var ch = val[j - 1];
-            if (['[', '(', ' ', ')', ']'].indexOf(ch) > -1 ||
+            if (['[', '(', ' ', ')', ']', ','].indexOf(ch) > -1 ||
                 isOperator(ch)) {
                 startIndex = j;
                 break;
             }
             varName = ch + varName;
         }
-        var optionsHTML = '', isFirstItem = true;
-        for (var i = 0; i < variables.length; i++) {
-            if (variables[i].name.toLowerCase().indexOf(varName.toLowerCase()) > -1) {
-                optionsHTML += "<div class='exp-suggestion-item " + (isFirstItem ? "selected" : "") +
-                    "' data-start='" + startIndex +
-                    "' data-current='" + cursor +
-                    "' data-id='" + variables[i].variableId + "'>" + variables[i].name + "</div>";
-                isFirstItem = false;
+        var optionsHTML = '', isFirstItem = true, items = [];
+        for (var l = 0; l < variables.length; l++) {
+            if (variables[l].name.toLowerCase().indexOf(varName.toLowerCase()) > -1)
+                items.push({ id: variables[l].variableId, text: variables[l].name });
+        }
+        var funcCount = 1;
+        var _loop_1 = function (f) {
+            if (f.toString().toLowerCase().indexOf(varName.toLowerCase()) > -1) {
+                var args_1 = '';
+                //read the function signature
+                options.funcs[f].toString().replace(/(function\s*[(](?:\\[\s\S]|[^)])*[)])/, function (text, func) {
+                    if (args_1 != '')
+                        return;
+                    if (func)
+                        args_1 = func.replace('function ', f);
+                });
+                //for (var k = 0; k < options.funcs[f].length; k++) {
+                //  args += "a" + (k + 1) + (k == options.funcs[f].length - 1 ? "" : ",");
+                //}
+                items.push({ id: f + funcCount++, text: args_1 });
+                //items.push({ id: f + funcCount++, text: `${f}(${args})` });
             }
+        };
+        for (var f in options.funcs) {
+            _loop_1(f);
+        }
+        for (var i = 0; i < items.length; i++) {
+            optionsHTML += "<div class='exp-suggestion-item " + (isFirstItem ? "selected" : "") +
+                "' data-start='" + startIndex +
+                "' data-current='" + cursor +
+                "' data-id='" + items[i].id + "'>" + items[i].text + "</div>";
+            isFirstItem = false;
         }
         if (optionsHTML != '')
             suggestions.attr('data-index', 0).html(optionsHTML).slideDown();
@@ -439,18 +415,19 @@ function expressionBuilder2(selector, options) {
     }
     function selectVariable(div) {
         var text = expressionInput.val().toString(), start = parseInt($(div).attr('data-start')), current = parseInt($(div).attr('data-current')), tail = text.substr(current);
-        if (tail != '') {
-            var _tail = tail, variableIsDone = false;
-            tail = '';
-            for (var i = 0; i < _tail.length; i++) {
-                if (_tail[i] == ']') {
-                    variableIsDone = true;
-                    continue;
-                }
-                if (variableIsDone)
-                    tail += _tail[i];
-            }
-        }
+        //if (tail != '') {
+        //  let _tail = tail,
+        //    variableIsDone = false;
+        //  tail = '';
+        //  for (var i = 0; i < _tail.length; i++) {
+        //    if (_tail[i] == ']') {
+        //      variableIsDone = true;
+        //      continue;
+        //    }
+        //    if (variableIsDone)
+        //      tail += _tail[i];
+        //  }
+        //}
         var selectedText = $(div).text();
         if (isNumber(selectedText[0])) {
             if (text[start - 1] != '[')
@@ -477,14 +454,11 @@ function expressionBuilder2(selector, options) {
     }
     return {
         getExpression: function () {
-            var p = parser(expressionInput.val());
-            var v = p.validate();
-            if (v != "") {
-                console.warn(v);
-                return;
-            }
+            var p = parser(expressionInput.val(), parserOptions);
             var tree = p.getExpressionTree();
-            return tree.toString();
+            if (tree === undefined)
+                return undefined;
+            return tree.toString(true);
             //return parseInput().expression;
         },
         setExpression: function (expression) {

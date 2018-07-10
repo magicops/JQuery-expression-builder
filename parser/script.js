@@ -10,35 +10,11 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 var parser = function (expression, options) {
-    var defaultFuncs = {
-        Add: function (x, y) {
-            return x + y;
-        },
-        Sub: function (x, y) {
-            return x - y;
-        },
-        Substr: function (str, from) {
-            if (!str)
-                throw new Error("String is not degined!");
-            if (typeof str !== "string")
-                throw new Error("The passed parameter is not a string!");
-            return str.substr(from);
-        },
-        majid: function () {
-            return "majid";
-        },
-        test: function (x) {
-            return x * 2;
-        }
-    };
     var defaults = {
-        useDefaultFuncs: true,
         funcs: {},
-        variables: {}
+        variables: []
     };
     options = $.extend({}, defaults, options);
-    if (options.useDefaultFuncs)
-        options.funcs = $.extend({}, defaultFuncs, options.funcs);
     //abstract base-class
     var GraphNode = /** @class */ (function () {
         function GraphNode() {
@@ -53,9 +29,41 @@ var parser = function (expression, options) {
             _this.value = value;
             return _this;
         }
+        ValueNode.prototype.getNumberValue = function () {
+            return parseInt(this.value.toString());
+        };
+        ValueNode.prototype.getStringValue = function () {
+            return this.value.toString();
+        };
+        ValueNode.prototype.getArrayValue = function () {
+            return this.value;
+        };
         ValueNode.prototype.compute = function () { return this.value; };
-        ValueNode.prototype.toString = function () { return this.value instanceof Array ? this.value.filter(function (v) { return v != ","; }) : this.value; };
+        ValueNode.prototype.toString = function (parseVariables) {
+            if (parseVariables === void 0) { parseVariables = false; }
+            if (this.value instanceof Array)
+                return this.value
+                    .filter(function (v) { return !(v instanceof CommaNode); })
+                    .map(function (v) { return v.toString(true); })
+                    .join(",");
+            if (typeof this.value === 'string')
+                return "\"" + this.value + "\"";
+            return this.value.toString();
+        };
         return ValueNode;
+    }(GraphNode));
+    var CommaNode = /** @class */ (function (_super) {
+        __extends(CommaNode, _super);
+        function CommaNode() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        CommaNode.prototype.compute = function () {
+            return ",";
+        };
+        CommaNode.prototype.toString = function (parseVariables) {
+            return ",";
+        };
+        return CommaNode;
     }(GraphNode));
     var PropertyNode = /** @class */ (function (_super) {
         __extends(PropertyNode, _super);
@@ -66,16 +74,35 @@ var parser = function (expression, options) {
             _this.inBrackets = inBrackets;
             return _this;
         }
-        PropertyNode.prototype.compute = function (ctx) {
-            if (!ctx[this.property]) {
-                var x = prompt("Enter a value for " + this.property), y = void 0;
-                if (!isNaN(parseInt(x)))
-                    y = parseInt(x);
-                ctx[this.property] = y;
+        PropertyNode.prototype.compute = function () {
+            var variable;
+            for (var i = 0; i < options.variables.length; i++) {
+                var v = options.variables[i];
+                if (v.name == this.property) {
+                    variable = v;
+                    break;
+                }
             }
-            return ctx[this.property];
+            if (variable === undefined) {
+                throw new Error("Property '" + this.property + "' is not defined!");
+                //let x = prompt("Enter a value for " + this.property),
+                //  y: any;
+                //if (!isNaN(parseInt(x)))
+                //  y = parseInt(x);
+                //ctx[this.property] = y;
+            }
+            return variable.value || variable.variableId;
         };
-        PropertyNode.prototype.toString = function () { return String(this.property); };
+        PropertyNode.prototype.toString = function (parseVariables) {
+            if (parseVariables === void 0) { parseVariables = false; }
+            if (parseVariables)
+                for (var i = 0; i < options.variables.length; i++) {
+                    var v = options.variables[i];
+                    if (v.name == this.property)
+                        return "[" + v.variableId + "]";
+                }
+            return String(this.property);
+        };
         return PropertyNode;
     }(GraphNode));
     //tree-nodes
@@ -91,17 +118,18 @@ var parser = function (expression, options) {
             _this.node = node;
             return _this;
         }
-        FuncNode.prototype.compute = function (ctx) {
-            var v = this.node.compute(ctx);
+        FuncNode.prototype.compute = function () {
+            var v = this.node.compute();
             var vars = v instanceof Array ? v : [v];
             var computes = vars
                 .filter(function (v) { return v != ","; }) //remove ,
-                .map(function (v) { return v instanceof GraphNode ? v.compute(ctx) : v; }); //compute each one
+                .map(function (v) { return v instanceof GraphNode ? v.compute() : v; }); //compute each one
             var func = options.funcs[this.name];
             return func.apply(func, computes);
         };
-        FuncNode.prototype.toString = function () {
-            return this.name + "(" + this.node.toString() + ")";
+        FuncNode.prototype.toString = function (parseVariables) {
+            if (parseVariables === void 0) { parseVariables = false; }
+            return this.name + "(" + this.node.toString(parseVariables) + ")";
         };
         return FuncNode;
     }(GraphNode));
@@ -118,9 +146,9 @@ var parser = function (expression, options) {
             _this.right = right;
             return _this;
         }
-        BinaryNode.prototype.compute = function (ctx) {
-            var l = this.left.compute(ctx);
-            var r = this.right.compute(ctx);
+        BinaryNode.prototype.compute = function () {
+            var l = this.left.compute();
+            var r = this.right.compute();
             switch (this.op) {
                 //computational operators
                 case "+": return l + r;
@@ -130,8 +158,9 @@ var parser = function (expression, options) {
             }
             throw new Error("operator not implemented '" + this.op + "'");
         };
-        BinaryNode.prototype.toString = function () {
-            return "( " + this.left.toString() + " " + this.op + " " + this.right.toString() + " )";
+        BinaryNode.prototype.toString = function (parseVariables) {
+            if (parseVariables === void 0) { parseVariables = false; }
+            return "( " + this.left.toString(parseVariables) + " " + this.op + " " + this.right.toString(parseVariables) + " )";
         };
         BinaryNode.operators = ["*", "/", "+", "-"];
         return BinaryNode;
@@ -177,7 +206,7 @@ var parser = function (expression, options) {
                 token = new PropertyNode(prop.substring(1, prop.length - 1), true);
             }
             else if (token == ',') {
-                //do nothing
+                token = new CommaNode();
             }
             else if (!op) {
                 throw new Error("unexpected token '" + token + "'");
@@ -186,12 +215,12 @@ var parser = function (expression, options) {
         });
         //detect negative numbers
         if (tokens[0] == "-" && tokens[1] instanceof ValueNode) {
-            tokens[1].value = -1 * tokens[1].value;
+            tokens[1].value = -1 * tokens[1].getNumberValue();
             tokens.splice(0, 1);
         }
         for (var i = 0; i < tokens.length; i++) {
             if (BinaryNode.operators.concat(['(', ',']).indexOf(tokens[i]) > -1 && tokens[i + 1] == "-" && tokens[i + 2] instanceof ValueNode) {
-                tokens[i + 2].value = tokens[i + 2].value * -1;
+                tokens[i + 2].value = tokens[i + 2].getNumberValue() * -1;
                 tokens.splice(i + 1, 1);
             }
         }
@@ -204,7 +233,7 @@ var parser = function (expression, options) {
                 var funcParam = i + 1 == j ? new ValueNode([]) : process(tokens.slice(i + 1, j));
                 var varsLength = 1;
                 if (funcParam instanceof ValueNode && funcParam.value instanceof Array) {
-                    varsLength = funcParam.value.filter(function (v) { return v != ","; }).length; //remove ,
+                    varsLength = funcParam.value.filter(function (v) { return !(v instanceof CommaNode); }).length; //remove ,
                 }
                 var func = options.funcs[op];
                 if (!func) {
@@ -229,10 +258,17 @@ var parser = function (expression, options) {
                 tokens.splice(i - 1, 3, new BinaryNode(token, tokens[i - 1], tokens[i + 1]));
             }
         });
-        if (tokens.indexOf(",") > -1) {
+        var hasComma = false;
+        for (var j = 0; j < tokens.length; j++) {
+            if (tokens[j] instanceof CommaNode) {
+                hasComma = true;
+                break;
+            }
+        }
+        if (hasComma) {
             var commaCount = tokens.filter(function (t) { return t == ","; }).length, argCount = commaCount * 2 + 1;
             if (tokens.length != argCount)
-                throw new Error("Syntax error for the arguments: " + tokens.filter(function (t) { return t != ","; }).join(","));
+                throw new Error("Syntax error for the arguments: " + tokens.filter(function (t) { return !(t instanceof CommaNode); }).join(","));
             tokens = [new ValueNode(tokens)];
         }
         if (tokens.length !== 1) {
@@ -243,16 +279,26 @@ var parser = function (expression, options) {
     }
     return {
         getExpressionTree: function () {
-            return parse(expression);
+            try {
+                return parse(expression);
+            }
+            catch (e) {
+                return undefined;
+            }
         },
-        runExpressionTree: function (data) {
-            var tree = parse(expression);
-            return tree.compute(data);
+        runExpressionTree: function () {
+            try {
+                var tree = parse(expression);
+                return tree.compute();
+            }
+            catch (e) {
+                return undefined;
+            }
         },
         validate: function () {
             var result = "";
             try {
-                var tree = parse(expression);
+                parse(expression).compute();
             }
             catch (e) {
                 result = e.message;

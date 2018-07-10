@@ -2,12 +2,25 @@
 
 /// <reference path="jquery.d.ts" />
 
+interface ExpVariable {
+  variableId: number,
+  name: string,
+  value?: any
+}
+
 interface HTMLElement {
   selectionStart: any,
   setSelectionRange: any;
 }
 
-function expressionBuilder2(selector: string | JQuery, options?: any) {
+interface ExpressionBuilderOption {
+  suggestions?: 'up' | 'down',
+  expression?: string,
+  variables?: Array<ExpVariable>,
+  funcs?: any
+}
+
+function expressionBuilder2(selector: string | JQuery, options?: ExpressionBuilderOption) {
 
   if (!selector)
     throw new Error("The selector is undefined. It should be a string selctor or a JQuery DOM element.")
@@ -29,8 +42,9 @@ function expressionBuilder2(selector: string | JQuery, options?: any) {
     suggestions,
     notificaiton,
     isPaste = false,
-    variables;
-
+    variables,
+    parserOptions: ParserOption;
+  
   //Initial for the first time
   initial();
 
@@ -49,6 +63,9 @@ function expressionBuilder2(selector: string | JQuery, options?: any) {
 
       variables = options.variables || [];
       expressionInput.data('variables', variables);
+
+      options.funcs = options.funcs || [];
+      expressionInput.data('funcs', options.funcs);
 
       let parent = $("<div class='exp-container' exp-id='" + id + "'></div>");
 
@@ -80,9 +97,18 @@ function expressionBuilder2(selector: string | JQuery, options?: any) {
       let id = expressionInput.attr('exp-id');
       suggestions = $('.exp-container .exp-suggestions[exp-id=' + id + "]");
       notificaiton = $('.exp-container .exp-notification[exp-id=' + id + "]");
+
       if (!variables)
         variables = expressionInput.data('variables');
+
+      if (!options.funcs)
+        options.funcs = expressionInput.data('funcs');
     }
+
+    parserOptions = {
+      funcs: options.funcs,
+      variables: variables
+    };
   }
 
   function onPaste() {
@@ -92,8 +118,13 @@ function expressionBuilder2(selector: string | JQuery, options?: any) {
 
   function onKeydown(e) {
 
-    if (!inVariable)
-      return;
+    //if (!inVariable)
+    //  return;
+
+    if (e.key == 'Esc') {
+      hideSuggestions();
+      return false;
+    }
 
     if (['Up', 'Down', 'ArrowUp', 'ArrowDown'].indexOf(e.key) > -1) {
       let index = parseInt(suggestions.attr('data-index')),
@@ -361,9 +392,13 @@ function expressionBuilder2(selector: string | JQuery, options?: any) {
 
     if (1 > 2)
       forceCharInput(text, textCursor, lastInput);
+    else {
+      if (isVariableCharacter(lastInput)) {
+        showSuggestions(text, textCursor);
+      }
 
-    if (isVariableCharacter(lastInput)) {
-      showSuggestions(text, textCursor);
+      lastText = text;
+      validation();
     }
   }
 
@@ -473,110 +508,22 @@ function expressionBuilder2(selector: string | JQuery, options?: any) {
     return char >= '0' && char <= '9';
   }
 
-  function parseInput() {
-    let text = expressionInput.val().toString(),
-      formula = '',
-      expression = '',
-      inVariable = false,
-      _inString = false,
-      varName = '',
-      varNames = [],
-      stringText = '',
-      strings = [];
-
-    for (var i = 0; i < text.length; i++) {
-      let input = text[i];
-
-      //check string input
-      if (input == '"' && !_inString) {
-        _inString = true;
-        continue;
-      }
-
-      if (input == '"' && _inString) {
-        strings.push(stringText);
-
-        formula += '"A"';
-        expression += '"' + stringText + '"';
-
-        stringText = '';
-        _inString = false;
-        continue;
-      }
-
-      if (_inString) {
-        stringText += input;
-        continue;
-      }
-      //end of check string input
-
-      if (isOperator(input) || ['(', ')'].indexOf(input) > -1) {
-        formula += input;
-        expression += input;
-        continue;
-      }
-
-      if (input == '[') {
-        inVariable = true;
-        continue;
-      }
-
-      if (input == ']' && inVariable) {
-        varNames.push(varName);
-
-        let variable = getVariable(varName);
-        expression += variable ? "[" + variable.variableId + "]" : "[0]";
-        formula += 9;
-
-        varName = '';
-        inVariable = false;
-        continue;
-      }
-
-      if (inVariable) {
-        varName += input;
-        continue;
-      }
-
-      formula += input;
-      expression += input;
-    }
-
-    let x = {
-      formula: formula,
-      expression: expression,
-      variables: varNames,
-      strings: strings
-    };
-
-    //console.log(x)
-
-    return x;
-  }
-
   function validation() {
-    let result = parseInput();
 
-    try {
-      if (result.expression == '')
-        throw new Error("expression is empty!");
+    let text = expressionInput.val().toString();
 
-      for (var i = 0; i < result.variables.length; i++)
-        if (!getVariable(result.variables[i]))
-          throw new Error(result.variables[i] + " does not exists!");
+    let v = parser(text, parserOptions).validate();
 
-      eval(result.formula);
-
+    if (v == '') {
       notificaiton.parent().removeClass('invalid').addClass('valid');
       notificaiton.removeAttr('title');
-    } catch (ex) {
-      console.warn("exp.js validation: " + ex.message);
-      notificaiton.parent().addClass('invalid').removeClass('valid');
-      notificaiton.attr('title', ex.message);
-      return false;
+      return true;
     }
 
-    return true;
+    console.warn("exp.js validation: " + v);
+    notificaiton.parent().addClass('invalid').removeClass('valid');
+    notificaiton.attr('title', v);
+    return false;
   }
 
   function setCursorPosition(position: number) {
@@ -588,14 +535,14 @@ function expressionBuilder2(selector: string | JQuery, options?: any) {
     suggestions.empty().hide();
   }
 
-  function showSuggestions(val, cursor) {
+  function showSuggestions(val: string, cursor: number) {
     let varName = '',
       startIndex = 0;
 
     for (var j = cursor; j > 0; j--) {
       let ch = val[j - 1];
 
-      if (['[', '(', ' ', ')', ']'].indexOf(ch) > -1 ||
+      if (['[', '(', ' ', ')', ']', ','].indexOf(ch) > -1 ||
         isOperator(ch)) {
         startIndex = j;
         break;
@@ -605,17 +552,45 @@ function expressionBuilder2(selector: string | JQuery, options?: any) {
     }
 
     let optionsHTML = '',
-      isFirstItem = true;
+      isFirstItem = true,
+      items = [];
 
-    for (var i = 0; i < variables.length; i++) {
-      if (variables[i].name.toLowerCase().indexOf(varName.toLowerCase()) > -1) {
-        optionsHTML += "<div class='exp-suggestion-item " + (isFirstItem ? "selected" : "") +
-          "' data-start='" + startIndex +
-          "' data-current='" + cursor +
-          "' data-id='" + variables[i].variableId + "'>" + variables[i].name + "</div>";
 
-        isFirstItem = false;
+    for (var l = 0; l < variables.length; l++) {
+      if (variables[l].name.toLowerCase().indexOf(varName.toLowerCase()) > -1)
+        items.push({ id: variables[l].variableId, text: variables[l].name });
+    }
+
+    let funcCount = 1;
+    for (let f in options.funcs) {
+      if (f.toString().toLowerCase().indexOf(varName.toLowerCase()) > -1) {
+        let args = '';
+
+        //read the function signature
+        options.funcs[f].toString().replace(/(function\s*[(](?:\\[\s\S]|[^)])*[)])/, function (text, func) {
+          if (args != '')
+            return;
+
+          if (func)
+            args = func.replace('function ', f);
+        });
+
+        //for (var k = 0; k < options.funcs[f].length; k++) {
+        //  args += "a" + (k + 1) + (k == options.funcs[f].length - 1 ? "" : ",");
+        //}
+
+        items.push({ id: f + funcCount++, text: args });
+        //items.push({ id: f + funcCount++, text: `${f}(${args})` });
       }
+    }
+
+    for (var i = 0; i < items.length; i++) {
+      optionsHTML += "<div class='exp-suggestion-item " + (isFirstItem ? "selected" : "") +
+        "' data-start='" + startIndex +
+        "' data-current='" + cursor +
+        "' data-id='" + items[i].id + "'>" + items[i].text + "</div>";
+
+      isFirstItem = false;
     }
 
     if (optionsHTML != '')
@@ -630,22 +605,22 @@ function expressionBuilder2(selector: string | JQuery, options?: any) {
       current: number = parseInt($(div).attr('data-current')),
       tail = text.substr(current);
 
-    if (tail != '') {
-      let _tail = tail,
-        variableIsDone = false;
+    //if (tail != '') {
+    //  let _tail = tail,
+    //    variableIsDone = false;
 
-      tail = '';
+    //  tail = '';
 
-      for (var i = 0; i < _tail.length; i++) {
-        if (_tail[i] == ']') {
-          variableIsDone = true;
-          continue;
-        }
+    //  for (var i = 0; i < _tail.length; i++) {
+    //    if (_tail[i] == ']') {
+    //      variableIsDone = true;
+    //      continue;
+    //    }
 
-        if (variableIsDone)
-          tail += _tail[i];
-      }
-    }
+    //    if (variableIsDone)
+    //      tail += _tail[i];
+    //  }
+    //}
 
     let selectedText = $(div).text();
 
@@ -679,17 +654,13 @@ function expressionBuilder2(selector: string | JQuery, options?: any) {
   return {
     getExpression: function () {
 
-      let p = parser(expressionInput.val());
-      let v = p.validate();
-
-      if (v != "") {
-        console.warn(v);
-        return;
-      }
-
-
+      let p = parser(expressionInput.val(), parserOptions);
       let tree = p.getExpressionTree();
-      return tree.toString();
+
+      if (tree === undefined)
+        return undefined;
+
+      return tree.toString(true);
 
       //return parseInput().expression;
     },
