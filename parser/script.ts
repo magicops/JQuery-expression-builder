@@ -2,7 +2,7 @@
 
 interface ParserOption {
   funcs?: any,
-  variables?: Array<ExpVariable>
+  variables?: Array<ExpressionBuilderVariable>
 }
 
 let parser = function (expression: string, options?: ParserOption) {

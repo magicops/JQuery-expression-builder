@@ -20,7 +20,7 @@ var funcs = {
     }
 };
 $(function () {
-    expressionBuilder2('#txt', {
+    $('#txt').expressionBuilder({
         funcs: funcs,
         variables: [
             {
@@ -37,7 +37,7 @@ $(function () {
             }
         ]
     });
-    expressionBuilder2('#txt2', {
+    $('#txt2').expressionBuilder({
         variables: [
             {
                 variableId: 1,
@@ -53,7 +53,7 @@ $(function () {
     });
     $('#txt').keypress(function () {
         setTimeout(function () {
-            var txtExp = expressionBuilder2('#txt');
+            var txtExp = $('#txt').expressionBuilder();
             var exp = txtExp.getExpression();
             $('.res-1-1').html("Expression: " + exp);
             var input = txtExp.getInput();
@@ -61,7 +61,7 @@ $(function () {
         }, 100);
     });
     $('#btn-1-2').click(function () {
-        var txtExp = expressionBuilder2('#txt2');
+        var txtExp = $('#txt2').expressionBuilder();
         txtExp.setExpression($('#txt-1-2').val());
     });
 });

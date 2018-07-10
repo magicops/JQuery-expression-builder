@@ -25,7 +25,7 @@ let funcs = {
 
 
 $(function () {
-  expressionBuilder2('#txt', {
+  $('#txt').expressionBuilder({
     funcs: funcs,
     variables: [
       {
@@ -42,7 +42,7 @@ $(function () {
       }
     ]
   });
-  expressionBuilder2('#txt2', {
+  $('#txt2').expressionBuilder({
     variables: [
       {
         variableId: 1,
@@ -59,7 +59,7 @@ $(function () {
 
   $('#txt').keypress(function () {
     setTimeout(function () {
-      let txtExp = expressionBuilder2('#txt');
+      let txtExp = $('#txt').expressionBuilder();
       let exp = txtExp.getExpression();
       $('.res-1-1').html("Expression: " + exp);
 
@@ -69,7 +69,7 @@ $(function () {
   });
 
   $('#btn-1-2').click(function () {
-    let txtExp = expressionBuilder2('#txt2');
+    let txtExp = $('#txt2').expressionBuilder();
     txtExp.setExpression($('#txt-1-2').val());
   });
 });
