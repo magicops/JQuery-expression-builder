@@ -1,0 +1,29 @@
+---
+layout: default
+title: Demo
+---
+
+<section class="bs-docs-section">
+  <h1 id="demo-basic" class="page-header">Basic</h1>
+  <p>This is the very basic use of the ExpressionBuilder by just enabling the tool with validaiton:</p>
+
+  <input type="text" id="txt-1" value="(10 + 5) / 2" />
+  <button class="btn btn-primary btn-validate-1">Validate</button>
+  <button class="btn btn-primary btn-get-1">Get</button>
+
+  <script>
+
+    var expBuilder = $('txt-1').expressionBuilder();
+
+    $('.btn-validate-1').on('click', function () {
+      if (expBuilder.isValid())
+        alert('Valid');
+      else
+        alert('Not valid');
+    });
+
+    $('.btn-get-1').on('click', function () {
+      alert(expBuilder.getExpression());
+    });
+  </script>
+</section>
