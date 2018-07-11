@@ -343,8 +343,8 @@ jQuery.fn.extend({
                 expressionInput.attr('exp-id', id);
                 options.variables = options.variables || [];
                 expressionInput.data('variables', options.variables);
-                options.funcs = options.funcs || [];
-                expressionInput.data('funcs', options.funcs);
+                options.functions = options.functions || [];
+                expressionInput.data('funcs', options.functions);
                 var parent_1 = $("<div class='exp-container' exp-id='" + id + "'></div>");
                 expressionInput.parent().append(parent_1);
                 parent_1
@@ -368,11 +368,11 @@ jQuery.fn.extend({
                 notificaiton = $('.exp-container .exp-notification[exp-id=' + id + "]");
                 if (!options.variables)
                     options.variables = expressionInput.data('variables');
-                if (!options.funcs)
-                    options.funcs = expressionInput.data('funcs');
+                if (!options.functions)
+                    options.functions = expressionInput.data('funcs');
             }
             parserOptions = {
-                funcs: options.funcs,
+                funcs: options.functions,
                 variables: options.variables
             };
         }
@@ -709,7 +709,7 @@ jQuery.fn.extend({
                 if (f.toString().toLowerCase().indexOf(varName.toLowerCase()) > -1) {
                     var args_1 = '';
                     //read the function signature
-                    options.funcs[f].toString().replace(/(function\s*[(](?:\\[\s\S]|[^)])*[)])/, function (text, func) {
+                    options.functions[f].toString().replace(/(function\s*[(](?:\\[\s\S]|[^)])*[)])/, function (text, func) {
                         if (args_1 != '')
                             return;
                         if (func)
@@ -722,7 +722,7 @@ jQuery.fn.extend({
                     //items.push({ id: f + funcCount++, text: `${f}(${args})` });
                 }
             };
-            for (var f in options.funcs) {
+            for (var f in options.functions) {
                 _loop_1(f);
             }
             for (var i = 0; i < items.length; i++) {
