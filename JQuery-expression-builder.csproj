@@ -70,6 +70,7 @@
   <ItemGroup>
     <Content Include="changelog.html" />
     <Content Include="demo.html" />
+    <Content Include="demo\index.js" />
     <Content Include="favicon.ico" />
     <Content Include="hidden.html" />
     <Content Include="index.html" />
@@ -79,6 +80,7 @@
     <Content Include=".github\ISSUE_TEMPLATE\Bug_report.md" />
     <Content Include=".github\ISSUE_TEMPLATE\Feature_request.md" />
     <Content Include="CNAME" />
+    <Content Include="demo\index.js.map" />
     <None Include="packages.config" />
     <Content Include="assets\css\docs.min.css" />
     <Content Include="assets\css\style.css" />
