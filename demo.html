@@ -23,6 +23,23 @@ title: Demo
     <button class="btn btn-primary btn-get-1">Get</button>
   </div>
 
+  <!-- @formatter:off -->
+  {% highlight javascript %}
+    var expBuilder = $('#txt-1').expressionBuilder();
+
+    $('.btn-validate-1').on('click', function () {
+      if (expBuilder.isValid())
+        showMessage('Valid');
+      else
+        showMessage('Not valid');
+    });
+
+    $('.btn-get-1').on('click', function () {
+      showMessage(expBuilder.getExpression());
+    });
+  {% endhighlight %}
+  <!-- @formatter:on -->
+
   <script id="basic-script">
 
     var expBuilder = $('#txt-1').expressionBuilder();
@@ -52,6 +69,41 @@ title: Demo
     <button class="btn btn-primary btn-get-exp-2">Get expression</button>
     <button class="btn btn-primary btn-get-input-2">Get input</button>
   </div>
+
+  <!-- @formatter:off -->
+  {% highlight javascript %}
+    let options = {
+      variables: [
+        {
+          variableId: 1,
+          name: 'FirstName'
+        },
+        {
+          variableId: 2,
+          name: 'Age'
+        }
+      ],
+      expression: "[2] + 4"
+    };
+
+    var expBuilder2 = $('#txt-2').expressionBuilder(options);
+
+    $('.btn-validate-2').on('click', function () {
+      if (expBuilder2.isValid())
+        showMessage('Valid');
+      else
+        showMessage('Not valid');
+    });
+
+    $('.btn-get-exp-2').on('click', function () {
+      showMessage(expBuilder2.getExpression());
+    });
+
+    $('.btn-get-input-2').on('click', function () {
+      showMessage(expBuilder2.getInput());
+    });
+  {% endhighlight %}
+  <!-- @formatter:on -->
 
   <script id="variable-script">
 
@@ -100,6 +152,56 @@ title: Demo
     <button class="btn btn-primary btn-get-exp-3">Get expression</button>
     <button class="btn btn-primary btn-get-run-3">Run expression</button>
   </div>
+
+  <p>Note that you can add more validation within your functions by threwing an error.</p>
+
+  <!-- @formatter:off -->
+  {% highlight javascript %}
+
+    let options3 = {
+      variables: [
+        {
+          variableId: 1,
+          name: 'FirstName'
+        },
+        {
+          variableId: 2,
+          name: 'Age'
+        }
+      ],
+      expression: "Add([2], 4)",
+      functions: {
+        Add: function (x, y) {
+
+          if (x == undefined || isNaN(parseFloat(x)))
+            throw new Error("Parameter 'x' is not defined or is not a number.");
+
+          return x + y;
+        },
+        Sub: function (x, y) {
+          return x - y;
+        }
+      }
+    };
+
+    var expBuilder3 = $('#txt-3').expressionBuilder(options3);
+
+    $('.btn-validate-3').on('click', function () {
+      if (expBuilder3.isValid())
+        showMessage('Valid');
+      else
+        showMessage('Not valid');
+    });
+
+    $('.btn-get-exp-3').on('click', function () {
+      showMessage(expBuilder3.getExpression());
+    });
+
+    $('.btn-get-run-3').on('click', function () {
+      showMessage(expBuilder3.getInput() + " = " + expBuilder3.runExpression());
+    });
+  {% endhighlight %}
+  <!-- @formatter:on -->
 
   <script id="variable-script">
 
