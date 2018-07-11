@@ -61,7 +61,7 @@ $(function () {
     setTimeout(function () {
       let txtExp = $('#txt').expressionBuilder();
       let exp = txtExp.getExpression();
-      $('.res-1-1').html("Expression: " + exp);
+      $('.res-1-1').html("Expression: " + exp + " = " + txtExp.runExpression());
 
       let input = txtExp.getInput();
       $('.res-1-2').html("Input: " + input);
