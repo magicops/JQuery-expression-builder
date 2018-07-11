@@ -1,4 +1,4 @@
-﻿.exp-container {
+.exp-container {
     position: relative;
 }
 
@@ -17,6 +17,7 @@
         position: absolute;
         top: 9px;
         left: 5px;
+        cursor: help;
     }
 
         .exp-container .exp-notification span {
@@ -60,7 +61,7 @@
     }
 
     .exp-container .exp-suggestions {
-        border-color: red;
+        width: 100%;
         background-color: white;
         box-shadow: 0px 5px 7px 2px rgba(0,0,0,0.3);
         min-height: 50px;
@@ -68,7 +69,7 @@
         overflow-y: auto;
         position: absolute;
         display: none;
-        z-index: 1150;
+        z-index: 1069;
     }
 
         .exp-container .exp-suggestions.up {
@@ -79,7 +80,7 @@
             cursor: pointer;
             width: 100%;
             padding: 3px 5px;
-            min-width: 800px;
+            min-width: 400px;
         }
 
             .exp-container .exp-suggestions .exp-suggestion-item.selected {

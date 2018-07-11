@@ -163,122 +163,129 @@ jQuery.fn.extend({
                 };
                 BinaryNode.prototype.toString = function (parseVariables) {
                     if (parseVariables === void 0) { parseVariables = false; }
-                    return "( " + this.left.toString(parseVariables) + " " + this.op + " " + this.right.toString(parseVariables) + " )";
+                    return this.left.toString(parseVariables) + this.op + this.right.toString(parseVariables);
                 };
                 BinaryNode.operators = ["*", "/", "+", "-"];
                 return BinaryNode;
             }(GraphNode));
-            //dynamically build my parsing regex:
-            var tokenParser = new RegExp([
-                //properties
-                /\[[a-zA-Z0-9$_]*\]+/.source,
-                //numbers
-                /\d+(?:\.\d*)?|\.\d+/.source,
-                //string-literal
-                /["](?:\\[\s\S]|[^"])+["]|['](?:\\[\s\S]|[^'])+[']/.source,
-                //booleans
-                //"true|false",
-                //operators
-                ["(", ")"].concat(BinaryNode.operators)
-                    .map(function (str) { return String(str).replace(/[.*+?^=!:${}()|[\]\/\\]/g, '\\$&'); })
-                    .join("|"),
-                //properties
-                //has to be after the operators
-                /[a-zA-Z$_][a-zA-Z0-9$_]*/.source,
-                //remaining (non-whitespace-)chars, just in case
-                //has to be at the end
-                /\S/.source
-            ].map(function (s) { return "(" + s + ")"; }).join("|"), "g");
             function parse(str) {
-                var tokens = [];
-                //abusing str.replace() as a RegExp.forEach
-                str.replace(tokenParser, function (token, prop, number, str, op, property) {
-                    if (number) {
-                        token = new ValueNode(+number);
-                    }
-                    else if (str) {
-                        str = str.replace(/'/g, '"');
-                        token = new ValueNode(JSON.parse(str));
-                        //}else if(bool){
-                        //  token = new ValueNode(bool === "true");
-                    }
-                    else if (property) {
-                        token = new PropertyNode(property);
-                    }
-                    else if (prop) {
-                        token = new PropertyNode(prop.substring(1, prop.length - 1), true);
-                    }
-                    else if (token == ',') {
-                        token = new CommaNode();
-                    }
-                    else if (!op) {
-                        throw new Error("unexpected token '" + token + "'");
-                    }
-                    tokens.push(token);
-                });
-                //detect negative numbers
-                if (tokens[0] == "-" && tokens[1] instanceof ValueNode) {
-                    tokens[1].value = -1 * tokens[1].getNumberValue();
-                    tokens.splice(0, 1);
-                }
-                for (var i = 0; i < tokens.length; i++) {
-                    if (BinaryNode.operators.concat(['(', ',']).indexOf(tokens[i]) > -1 && tokens[i + 1] == "-" && tokens[i + 2] instanceof ValueNode) {
-                        tokens[i + 2].value = tokens[i + 2].getNumberValue() * -1;
-                        tokens.splice(i + 1, 1);
-                    }
-                }
-                //end detect negative numbers
-                //wrap inside any parentheses
-                for (var i, j; (i = tokens.lastIndexOf("(")) > -1 && (j = tokens.indexOf(")", i)) > -1;) {
-                    //if before parentheses there is a property which means it is a function
-                    if (tokens[i - 1] instanceof PropertyNode && !tokens[i - 1].inBrackets) {
-                        var op = tokens[i - 1].toString();
-                        var funcParam = i + 1 == j ? new ValueNode([]) : process(tokens.slice(i + 1, j));
-                        var varsLength = 1;
-                        if (funcParam instanceof ValueNode && funcParam.value instanceof Array) {
-                            varsLength = funcParam.value.filter(function (v) { return !(v instanceof CommaNode); }).length; //remove ,
+                function extractTokens(exp) {
+                    //dynamically build my parsing regex:
+                    var tokenParser = new RegExp([
+                        //properties
+                        /\[[a-zA-Z0-9$_]*\]+/.source,
+                        //numbers
+                        /\d+(?:\.\d*)?|\.\d+/.source,
+                        //string-literal
+                        /["](?:\\[\s\S]|[^"])+["]|['](?:\\[\s\S]|[^'])+[']/.source,
+                        //booleans
+                        //"true|false",
+                        //operators
+                        ["(", ")"].concat(BinaryNode.operators)
+                            .map(function (str) { return String(str).replace(/[.*+?^=!:${}()|[\]\/\\]/g, '\\$&'); })
+                            .join("|"),
+                        //properties
+                        //has to be after the operators
+                        /[a-zA-Z$_][a-zA-Z0-9$_]*/.source,
+                        //remaining (non-whitespace-)chars, just in case
+                        //has to be at the end
+                        /\S/.source
+                    ].map(function (s) { return "(" + s + ")"; }).join("|"), "g");
+                    var _tokens = [];
+                    //abusing str.replace() as a RegExp.forEach
+                    exp.replace(tokenParser, function (token, prop, number, str, op, property) {
+                        var t;
+                        t = token;
+                        if (number)
+                            t = new ValueNode(+number);
+                        else if (str) {
+                            str = str.substr(1, str.length - 2);
+                            str = str.replace(/"/g, '\'');
+                            t = new ValueNode(JSON.parse('"' + str + '"'));
                         }
-                        var func = options.funcs[op];
-                        if (!func) {
-                            throw new Error(op + " is not defined.");
+                        else if (property)
+                            t = new PropertyNode(property);
+                        else if (prop)
+                            t = new PropertyNode(prop.substring(1, prop.length - 1), true);
+                        else if (token == ',')
+                            t = new CommaNode();
+                        else if (!op)
+                            throw new Error("unexpected token '" + token + "'");
+                        _tokens.push(t);
+                        return "";
+                    });
+                    return _tokens;
+                }
+                function handleNegativenumbers(tokens) {
+                    //detect negative numbers
+                    if (tokens[0] == "-" && tokens[1] instanceof ValueNode) {
+                        tokens[1].value = -1 * tokens[1].getNumberValue();
+                        tokens.splice(0, 1);
+                    }
+                    for (var i = 0; i < tokens.length; i++) {
+                        if (['(', ',', '/', '*'].indexOf(tokens[i]) > -1 && tokens[i + 1] == "-" && tokens[i + 2] instanceof ValueNode) {
+                            tokens[i + 2].value = tokens[i + 2].getNumberValue() * -1;
+                            tokens.splice(i + 1, 1);
                         }
-                        if (varsLength != func.length)
-                            throw new Error(op + " requires " + func.length + " argument(s)");
-                        var funcNode = new FuncNode(op, funcParam);
-                        tokens.splice(i - 1, j + 2 - i, funcNode);
                     }
-                    else
-                        tokens.splice(i, j + 1 - i, process(tokens.slice(i + 1, j)));
+                    //end detect negative numbers
+                    return tokens;
                 }
-                if (~tokens.indexOf("(") || ~tokens.indexOf(")")) {
-                    throw new Error("mismatching brackets");
-                }
-                return process(tokens);
-            }
-            function process(tokens) {
-                BinaryNode.operators.forEach(function (token) {
-                    for (var i = 1; (i = tokens.indexOf(token, i - 1)) > -1;) {
-                        tokens.splice(i - 1, 3, new BinaryNode(token, tokens[i - 1], tokens[i + 1]));
+                function wrapParenteses(tokens) {
+                    function process(tokens) {
+                        BinaryNode.operators.forEach(function (token) {
+                            for (var i = 1; (i = tokens.indexOf(token, i - 1)) > -1;) {
+                                tokens.splice(i - 1, 3, new BinaryNode(token, tokens[i - 1], tokens[i + 1]));
+                            }
+                        });
+                        var hasComma = false;
+                        for (var j = 0; j < tokens.length; j++) {
+                            if (tokens[j] instanceof CommaNode) {
+                                hasComma = true;
+                                break;
+                            }
+                        }
+                        if (hasComma) {
+                            var commaCount = tokens.filter(function (t) { return t == ","; }).length, argCount = commaCount * 2 + 1;
+                            if (tokens.length != argCount)
+                                throw new Error("Syntax error for the arguments: " + tokens.filter(function (t) { return !(t instanceof CommaNode); }).join(","));
+                            tokens = [new ValueNode(tokens)];
+                        }
+                        if (tokens.length !== 1) {
+                            console.log("error: ", tokens.slice());
+                            throw new Error("something went wrong");
+                        }
+                        return tokens[0];
                     }
-                });
-                var hasComma = false;
-                for (var j = 0; j < tokens.length; j++) {
-                    if (tokens[j] instanceof CommaNode) {
-                        hasComma = true;
-                        break;
+                    //wrap inside any parentheses
+                    for (var i, j; (i = tokens.lastIndexOf("(")) > -1 && (j = tokens.indexOf(")", i)) > -1;) {
+                        //if before parentheses there is a property which means it is a function
+                        if (tokens[i - 1] instanceof PropertyNode && !tokens[i - 1].inBrackets) {
+                            var op = tokens[i - 1].toString();
+                            var funcParam = i + 1 == j ? new ValueNode([]) : process(tokens.slice(i + 1, j));
+                            var varsLength = 1;
+                            if (funcParam instanceof ValueNode && funcParam.value instanceof Array)
+                                varsLength = funcParam.value.filter(function (v) { return !(v instanceof CommaNode); }).length; //remove            
+                            var func = options.funcs[op];
+                            if (!func) {
+                                throw new Error(op + " is not defined.");
+                            }
+                            if (varsLength != func.length)
+                                throw new Error(op + " requires " + func.length + " argument(s)");
+                            var funcNode = new FuncNode(op, funcParam);
+                            tokens.splice(i - 1, j + 2 - i, funcNode);
+                        }
+                        else
+                            tokens.splice(i, j + 1 - i, process(tokens.slice(i + 1, j)));
                     }
+                    if (~tokens.indexOf("(") || ~tokens.indexOf(")")) {
+                        throw new Error("mismatching brackets");
+                    }
+                    return process(tokens);
                 }
-                if (hasComma) {
-                    var commaCount = tokens.filter(function (t) { return t == ","; }).length, argCount = commaCount * 2 + 1;
-                    if (tokens.length != argCount)
-                        throw new Error("Syntax error for the arguments: " + tokens.filter(function (t) { return !(t instanceof CommaNode); }).join(","));
-                    tokens = [new ValueNode(tokens)];
-                }
-                if (tokens.length !== 1) {
-                    console.log("error: ", tokens.slice());
-                    throw new Error("something went wrong");
-                }
-                return tokens[0];
+                var expTokens = extractTokens(str);
+                expTokens = handleNegativenumbers(expTokens);
+                return wrapParenteses(expTokens);
             }
             return {
                 getExpressionTree: function () {
@@ -318,14 +325,20 @@ jQuery.fn.extend({
             options.expression = '';
         if (options.preventWrongInput === undefined)
             options.preventWrongInput = false;
-        var expressionInput = this, lastText = '', inVariable = false, inString = false, suggestions, notificaiton, isPaste = false, parserOptions;
+        var expressionInput = this, lastText = '', inVariable = false, inString = false, suggestions, notificaiton, isPaste = false, parserOptions = {
+            funcs: {},
+            variables: []
+        };
         //Initial for the first time
         initial();
+        //set value
+        if (options.expression != '')
+            setExpresionToInput(options.expression);
         function initial() {
             if (!expressionInput.attr('exp-id')) {
                 var id = new Date().getTime();
                 suggestions = $("<div class='exp-suggestions " + options.suggestions + "' exp-id='" + id + "'></div>");
-                notificaiton = $("<div class='exp-notification' data-toogle='tooltip' data-placement='right' exp-id='" + id +
+                notificaiton = $("<div class='exp-notification' data-toogle='tooltip' data-placement='top' exp-id='" + id +
                     "'><span class='glyphicon glyphicon-ok ok'></span><span class='glyphicon glyphicon-remove error'></span></div>");
                 expressionInput.attr('exp-id', id);
                 options.variables = options.variables || [];
@@ -345,12 +358,9 @@ jQuery.fn.extend({
                     selectVariable($(this));
                     e.stopPropagation();
                 });
-                expressionInput.on('blur', validation);
+                //expressionInput.on('blur', validation);
                 $('body').click(hideSuggestions);
                 expressionInput.click(function (e) { e.stopPropagation(); });
-                //set value
-                if (options.expression != '')
-                    setExpresionToInput(options.expression);
             }
             else {
                 var id = expressionInput.attr('exp-id');
@@ -580,18 +590,20 @@ jQuery.fn.extend({
             validation();
         }
         function parseExpression(expression) {
-            var exp = '', inVariable = false, _inString = false, stringText = '', varId = '';
+            var exp = '', inVariable = false, _inString = false, stringText = '', varId = '', quote;
             for (var i = 0; i < expression.length; i++) {
                 var input = expression[i];
                 //check string input
-                if (input == '"' && !_inString) {
+                if (['"', '\''].indexOf(input) > -1 && !_inString) {
+                    quote = input;
                     _inString = true;
                     continue;
                 }
-                if (input == '"' && _inString) {
-                    exp += '"' + stringText + '"';
+                if (input == quote && _inString) {
+                    exp += quote + stringText + quote;
                     stringText = '';
                     _inString = false;
+                    quote = undefined;
                     continue;
                 }
                 if (_inString) {
@@ -606,8 +618,12 @@ jQuery.fn.extend({
                 }
                 if (input == ']' && inVariable) {
                     var varName = getVariableById(parseInt(varId));
-                    if (varName)
-                        exp += "[" + varName + "]";
+                    if (varName) {
+                        if (isNumber(varName[0]))
+                            exp += "[" + varName + "]";
+                        else
+                            exp += varName;
+                    }
                     else
                         exp += "[var" + varId + "]";
                     inVariable = false;
@@ -656,11 +672,13 @@ jQuery.fn.extend({
             if (v == '') {
                 notificaiton.parent().removeClass('invalid').addClass('valid');
                 notificaiton.removeAttr('title');
+                notificaiton.tooltip('destroy');
                 return true;
             }
-            console.warn("exp.js validation: " + v);
+            //console.warn("exp.js validation: " + v);
             notificaiton.parent().addClass('invalid').removeClass('valid');
             notificaiton.attr('title', v);
+            notificaiton.tooltip('fixTitle');
             return false;
         }
         function setCursorPosition(position) {
