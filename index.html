@@ -88,6 +88,10 @@ isHome: true
   {% endhighlight %}
   <!-- @formatter:on -->
 
+  <p>
+    See the besic demo <a href="{{site.github.url | replace: 'http://', '//'}}demo.html#demo-basic">here</a>
+  </p>
+
   <h2 id="options">Options</h2>
 
   <div class="table-responsive">
@@ -188,6 +192,95 @@ isHome: true
   </div>
 
   <h3 id="variables">Variables</h3>
+
+  <div class="table-responsive">
+    <table class="table table-bordered table-striped">
+      <thead>
+        <tr>
+          Property
+        </tr>
+        <tr>
+          Type
+        </tr>
+        <tr>
+          Description
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            variableId
+          </td>
+          <td>
+            number|string
+          </td>
+          <td>
+            It will be replace with the variable name in a bracket liek <code>[32]</code>,
+            to avoid any error make sure to have a unique id for each variable
+          </td>
+        </tr>
+        <tr>
+          <td>
+            name
+          </td>
+          <td>
+            string
+          </td>
+          <td>
+            Searchable variable name
+          </td>
+        </tr>
+        <tr>
+          <td>
+            value
+          </td>
+          <td>
+            any
+          </td>
+          <td>
+            To compute the expression and get the result you can pass value to each variable
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p>
+    ExpressionBuilder will suggest the available variables while the user is typing part of the variable name and will replace
+    the variable Id in a bracket as the result. See the following example:
+  </p>
+
+  <!-- @formatter:off -->
+  {% highlight javascript %}
+  var options = {
+    varaibles: [
+      {
+        variableId: 1,
+        name: 'FirstName'
+      },
+      {
+        variableId: 2,
+        name: 'Age'
+      }
+    ]
+  };
+  var expBuilder = $('#txt').expressionBuilder(options);
+
+  //input: Age + 3
+  var expResult = expBuilder.getExpression();
+
+  //expResult: [2]+3
+  {% endhighlight %}
+  <!-- @formatter:on -->
+
+  <p>
+    If the varaiable name starts with a digit expressionBuilder will wrap it in brackets or user should type it in brackets like:
+    <code>[1_name] + " " + LastName</code>
+  </p>
+
+  <p>
+    See the varaible demo <a href="{{site.github.url | replace: 'http://', '//'}}demo.html#demo-variable">here</a>
+  </p>
 
   <h3 id="functions">Functions</h3>
 

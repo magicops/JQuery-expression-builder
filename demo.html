@@ -3,6 +3,14 @@ layout: default
 title: Demo
 ---
 
+<script>
+
+  function showMessage(str) {
+    alert(str);
+  }
+
+</script>
+
 <section class="bs-docs-section">
   <h1 id="demo-basic" class="page-header">Basic</h1>
   <p>This is the very basic use of the ExpressionBuilder by just enabling the tool with validaiton:</p>
@@ -21,13 +29,61 @@ title: Demo
 
     $('.btn-validate-1').on('click', function () {
       if (expBuilder.isValid())
-        alert('Valid');
+        showMessage('Valid');
       else
-        alert('Not valid');
+        showMessage('Not valid');
     });
 
     $('.btn-get-1').on('click', function () {
-      alert(expBuilder.getExpression());
+      showMessage(expBuilder.getExpression());
+    });
+  </script>
+</section>
+
+<section class="bs-docs-section">
+  <h1 id="demo-variable" class="page-header">Variables</h1>
+  <p>In this example we have defined a variable list for the expressionBuidler, type the variable names to see the suggestions:</p>
+
+  <div class="form-group">
+    <input type="text" id="txt-2" class="form-control" />
+  </div>
+  <div class="form-group">
+    <button class="btn btn-primary btn-validate-2">Validate</button>
+    <button class="btn btn-primary btn-get-exp-2">Get expression</button>
+    <button class="btn btn-primary btn-get-input-2">Get input</button>
+  </div>
+
+  <script>
+
+    let options = {
+      variables: [
+        {
+          variableId: 1,
+          name: 'FirstName'
+        },
+        {
+          variableId: 2,
+          name: 'Age'
+        }
+      ],
+      expression: "[2] + 4"
+    };
+
+    var expBuilder2 = $('#txt-2').expressionBuilder(options);
+
+    $('.btn-validate-2').on('click', function () {
+      if (expBuilder2.isValid())
+        showMessage('Valid');
+      else
+        showMessage('Not valid');
+    });
+
+    $('.btn-get-exp-2').on('click', function () {
+      showMessage(expBuilder2.getExpression());
+    });
+
+    $('.btn-get-input-2').on('click', function () {
+      showMessage(expBuilder2.getinput());
     });
   </script>
 </section>
