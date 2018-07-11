@@ -68,13 +68,8 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="demo\index.js.map" />
     <None Include="packages.config" />
-    <Content Include="demo\index.js" />
-    <Content Include="parser\index.html" />
-    <Content Include="parser\script.js" />
     <Content Include="README.md" />
-    <Content Include="parser\script.js.map" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -86,6 +81,12 @@
     <Content Include=".gitignore" />
     <Content Include="demo\index.html" />
     <TypeScriptCompile Include="demo\index.ts" />
+    <None Include="demo\index.js">
+      <DependentUpon>index.ts</DependentUpon>
+    </None>
+    <None Include="demo\index.js.map">
+      <DependentUpon>index.ts</DependentUpon>
+    </None>
     <Content Include="demo\style.css" />
     <Content Include="src\expression-builder.css" />
     <None Include="src\expression-builder.js.map">
@@ -106,7 +107,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <TypeScriptCompile Include="parser\script.ts" />
     <TypeScriptCompile Include="src\expression-builder-v2.ts" />
     <TypeScriptCompile Include="src\expression-builder.ts" />
     <TypeScriptCompile Include="src\jquery.d.ts" />
