@@ -6,7 +6,6 @@
 /obj
 /Properties
 
-*.csproj
 *.user
 *.config
 /tests
