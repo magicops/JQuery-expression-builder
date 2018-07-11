@@ -804,6 +804,8 @@ jQuery.fn.extend({
             },
             runExpression: function () {
                 var p = parser(expressionInput.val(), parserOptions);
+                if (p.validate() != '')
+                    return undefined;
                 var tree = p.getExpressionTree();
                 if (tree === undefined)
                     return undefined;

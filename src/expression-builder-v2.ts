@@ -212,7 +212,7 @@ jQuery.fn.extend({
           return this.left.toString(parseVariables) + this.op + this.right.toString(parseVariables);
         }
       }
-
+      
       function parse(str): GraphNode {
         function extractTokens(exp: string): Array<any> {
 
@@ -258,14 +258,14 @@ jQuery.fn.extend({
               str = str.replace(/"/g, '\'');
               t = new ValueNode(JSON.parse('"' + str + '"'));
             }
-            else if (property)
-              t = new PropertyNode(property);
-            else if (prop)
-              t = new PropertyNode(prop.substring(1, prop.length - 1), true);
-            else if (token == ',')
-              t = new CommaNode();
-            else if (!op)
-              throw new Error("unexpected token '" + token + "'");
+            else if (property) 
+              t = new PropertyNode(property);            
+            else if (prop) 
+              t = new PropertyNode(prop.substring(1, prop.length - 1), true);            
+            else if (token == ',') 
+              t = new CommaNode();            
+            else if (!op) 
+              throw new Error("unexpected token '" + token + "'");            
 
             _tokens.push(t);
 
@@ -367,7 +367,7 @@ jQuery.fn.extend({
 
         var expTokens = extractTokens(str);
 
-        expTokens = handleNegativenumbers(expTokens);
+        expTokens = handleNegativenumbers(expTokens);        
 
         return wrapParenteses(expTokens);
       }
@@ -1075,6 +1075,10 @@ jQuery.fn.extend({
 
       runExpression: function () {
         let p = parser(expressionInput.val(), parserOptions);
+
+        if (p.validate() != '')
+          return undefined;
+
         let tree = p.getExpressionTree();
 
         if (tree === undefined)
