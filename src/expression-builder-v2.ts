@@ -17,7 +17,7 @@ interface ExpressionBuilderOption {
   suggestions?: 'up' | 'down',
   expression?: string,
   variables?: Array<ExpressionBuilderVariable>,
-  funcs?: any,
+  functions?: any,
   preventWrongInput?: boolean
 }
 
@@ -444,8 +444,8 @@ jQuery.fn.extend({
         options.variables = options.variables || [];
         expressionInput.data('variables', options.variables);
 
-        options.funcs = options.funcs || [];
-        expressionInput.data('funcs', options.funcs);
+        options.functions = options.functions || [];
+        expressionInput.data('funcs', options.functions);
 
         let parent = $("<div class='exp-container' exp-id='" + id + "'></div>");
 
@@ -477,12 +477,12 @@ jQuery.fn.extend({
         if (!options.variables)
           options.variables = expressionInput.data('variables');
 
-        if (!options.funcs)
-          options.funcs = expressionInput.data('funcs');
+        if (!options.functions)
+          options.functions = expressionInput.data('funcs');
       }
 
       parserOptions = {
-        funcs: options.funcs,
+        funcs: options.functions,
         variables: options.variables
       };
     }
@@ -947,12 +947,12 @@ jQuery.fn.extend({
       }
 
       let funcCount = 1;
-      for (let f in options.funcs) {
+      for (let f in options.functions) {
         if (f.toString().toLowerCase().indexOf(varName.toLowerCase()) > -1) {
           let args = '';
 
           //read the function signature
-          options.funcs[f].toString().replace(/(function\s*[(](?:\\[\s\S]|[^)])*[)])/, function (text, func) {
+          options.functions[f].toString().replace(/(function\s*[(](?:\\[\s\S]|[^)])*[)])/, function (text, func) {
             if (args != '')
               return;
 

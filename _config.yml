@@ -17,7 +17,7 @@ favicon: ico
 # download.cdn.img is optional
 download:
   popup: false
-  url: https://github.com/majid-akbari/JQuery-expression-builder
+  url: https://github.com/majid-akbari/JQuery-expression-builder/archive/v2.1.zip
 
 # set this to true to replace the generated header navbar by _includes/navbar.html
 customNavBar: false

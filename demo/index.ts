@@ -26,7 +26,7 @@ let funcs = {
 
 $(function () {
   $('#txt').expressionBuilder({
-    funcs: funcs,
+    functions: funcs,
     variables: [
       {
         variableId: 1,

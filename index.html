@@ -59,9 +59,9 @@ isHome: true
 
 
 <section class="bs-docs-section">
-  <h1 id="basic-usage" class="page-header">Usage</h1>
+  <h1 id="usage" class="page-header">Usage</h1>
 
-  <h2 id="pages">Basic use</h2>
+  <h2 id="basic-use">Basic use</h2>
   <p>
     The fundamental use of the ExpressionBuilder could be just enabling a validation on the user input. fisrt we need to have a <code>input</code>:
   </p>
@@ -87,5 +87,108 @@ isHome: true
   let exp = expBuilder.getExpression();
   {% endhighlight %}
   <!-- @formatter:on -->
+
+  <h2 id="options">Options</h2>
+
+  <div class="table-responsive">
+    <table class="table table-bordered table-striped">
+      <thead>
+        <tr>
+          <th>
+            Name
+          </th>
+          <th>
+            Type
+          </th>
+          <th>
+            Default
+          </th>
+          <th>
+            Description
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            variables
+          </td>
+          <td>
+            object[]
+          </td>
+          <td></td>
+          <td>
+            Array of available variables to suggest while user is typing in the expression. <a href="#variables">
+              <i class="glyphicon glyphicon-info-sign"></i>
+              See below
+            </a>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            expression
+          </td>
+          <td>
+            string
+          </td>
+          <td>
+            ''
+          </td>
+          <td>
+            Initial expression to be set into the input while generating the expression builder
+          </td>
+        </tr>
+        <tr>
+          <td>
+            preventWrongInput
+          </td>
+          <td>
+            boolean
+          </td>
+          <td>
+            false
+          </td>
+          <td>
+            Helps the user to input the expression easily by preventing to input wrong caracters (limits some correct expressions to input)
+          </td>
+        </tr>
+        <tr>
+          <td>
+            functions
+          </td>
+          <td>
+            object
+          </td>
+          <td>
+            {}
+          </td>
+          <td>
+            A json object with desired fuctions to support in the expression. <a href="#functions">
+              <i class="glyphicon glyphicon-info-sign"></i>
+              See below
+            </a>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            suggestions
+          </td>
+          <td>
+            'up'|'down'
+          </td>
+          <td>
+            'down'
+          </td>
+          <td>
+            Suggestion position when the user is searching a variable or function
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 id="variables">Variables</h3>
+
+  <h3 id="functions">Functions</h3>
 
 </section>
