@@ -28,7 +28,8 @@ interface ExpressionBuilder {
   parseExpression(expression: string): string,
   getInput(): string,
   getVariableById(variableId: number): string,
-  setVariables(vars: Array<ExpressionBuilderVariable>): void
+  setVariables(vars: Array<ExpressionBuilderVariable>): void,
+  runExpression(): any
 }
 
 interface JQuery {
@@ -1046,8 +1047,6 @@ jQuery.fn.extend({
           return undefined;
 
         return tree.toString(true);
-
-        //return parseInput().expression;
       },
 
       setExpression: function (expression: string): void {
@@ -1072,6 +1071,16 @@ jQuery.fn.extend({
 
       setVariables: function (vars: Array<ExpressionBuilderVariable>) {
         options.variables = vars || [];
+      },
+
+      runExpression: function () {
+        let p = parser(expressionInput.val(), parserOptions);
+        let tree = p.getExpressionTree();
+
+        if (tree === undefined)
+          return undefined;
+
+        return tree.compute();
       }
     };
   }

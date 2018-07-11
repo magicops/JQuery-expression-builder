@@ -286,4 +286,33 @@ isHome: true
 
   <h3 id="functions">Functions</h3>
 
+  <p>
+    This is a flexible object you can add to expressionBuidler to support as part of the expression.
+    Not only it will suggest it while user is typing a part of the function name, but also it shows the function signature to help user to avoid wrong syntaxes.
+    Also, expresssionBuilder will use the same function when you run the expression.
+  </p>
+
+  <p>
+    In the following example we define to simple <code>Add</code> and <code>Sub</code> function to the expressionBuilder
+    and you can see the runing example in the <a href="{{site.github.url | replace: 'http://', '//'}}/demo.html#demo-functions">demo</a> page.
+  </p>
+
+  <!-- @formatter:off -->
+  {% highlight javascript %}
+  var options = {
+    functions: {
+      Add: function (x, y) {
+        return x + y;
+      },
+      Sub: function (x, y) {
+        return x - y;
+      }
+    }
+  };
+  var expBuilder = $('#txt').expressionBuilder(options);
+
+  //valid input: Add(2, 3)
+  {% endhighlight %}
+  <!-- @formatter:on -->
+
 </section>

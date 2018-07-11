@@ -783,7 +783,6 @@ jQuery.fn.extend({
                 if (tree === undefined)
                     return undefined;
                 return tree.toString(true);
-                //return parseInput().expression;
             },
             setExpression: function (expression) {
                 setExpresionToInput(expression);
@@ -802,6 +801,13 @@ jQuery.fn.extend({
             },
             setVariables: function (vars) {
                 options.variables = vars || [];
+            },
+            runExpression: function () {
+                var p = parser(expressionInput.val(), parserOptions);
+                var tree = p.getExpressionTree();
+                if (tree === undefined)
+                    return undefined;
+                return tree.compute();
             }
         };
     }

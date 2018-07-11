@@ -23,7 +23,7 @@ title: Demo
     <button class="btn btn-primary btn-get-1">Get</button>
   </div>
 
-  <script>
+  <script id="basic-script">
 
     var expBuilder = $('#txt-1').expressionBuilder();
 
@@ -53,7 +53,7 @@ title: Demo
     <button class="btn btn-primary btn-get-input-2">Get input</button>
   </div>
 
-  <script>
+  <script id="variable-script">
 
     let options = {
       variables: [
@@ -84,6 +84,66 @@ title: Demo
 
     $('.btn-get-input-2').on('click', function () {
       showMessage(expBuilder2.getInput());
+    });
+  </script>
+</section>
+
+<section class="bs-docs-section">
+  <h1 id="demo-functions" class="page-header">Functions</h1>
+  <p>In this example we have defined two funcitons for the expressionBuidler, type the function names to see the suggestions:</p>
+
+  <div class="form-group">
+    <input type="text" id="txt-3" class="form-control" />
+  </div>
+  <div class="form-group">
+    <button class="btn btn-primary btn-validate-3">Validate</button>
+    <button class="btn btn-primary btn-get-exp-3">Get expression</button>
+    <button class="btn btn-primary btn-get-run-3">Run expression</button>
+  </div>
+
+  <script id="variable-script">
+
+    let options = {
+      variables: [
+        {
+          variableId: 1,
+          name: 'FirstName'
+        },
+        {
+          variableId: 2,
+          name: 'Age'
+        }
+      ],
+      expression: "Add([2], 4)",
+      functions: {
+        Add: function (x, y) {
+
+          if (x == undefined || isNaN(parseFloat(x)))
+            throw new Error("Parameter 'x' is not defined or is not a number.");
+
+          return x + y;
+        },
+        Sub: function (x, y) {
+          return x - y;
+        }
+      }
+    };
+
+    var expBuilder3 = $('#txt-3').expressionBuilder(options);
+
+    $('.btn-validate-3').on('click', function () {
+      if (expBuilder3.isValid())
+        showMessage('Valid');
+      else
+        showMessage('Not valid');
+    });
+
+    $('.btn-get-exp-3').on('click', function () {
+      showMessage(expBuilder3.getExpression());
+    });
+
+    $('.btn-get-run-2').on('click', function () {
+      showMessage(expBuilder3.getInput() + " = " + expBuilder3.runExpression());
     });
   </script>
 </section>
