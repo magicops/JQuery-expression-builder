@@ -3,7 +3,7 @@
 /// <reference path="jquery.d.ts" />
 
 interface ExpressionBuilderVariable {
-  variableId: number,
+  variableId: number | string,
   name: string,
   value?: any
 }
@@ -827,7 +827,7 @@ jQuery.fn.extend({
         }
 
         if (input == ']' && inVariable) {
-          let varName = getVariableById(parseInt(varId));
+          let varName = getVariableById(varId);
 
           if (varName) {
             if (isNumber(varName[0]))
@@ -853,9 +853,9 @@ jQuery.fn.extend({
       return exp;
     }
 
-    function getVariableById(varId: number): string {
+    function getVariableById(varId: number | string): string {
       for (var i = 0; i < options.variables.length; i++)
-        if (options.variables[i].variableId == varId)
+        if (options.variables[i].variableId === varId)
           return options.variables[i].name;
 
       return undefined;
@@ -1065,7 +1065,7 @@ jQuery.fn.extend({
         return expressionInput.val();
       },
 
-      getVariableById: function (variableId: number) {
+      getVariableById: function (variableId: number | string) {
         return getVariableById(variableId);
       },
 

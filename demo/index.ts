@@ -45,16 +45,16 @@ $(function () {
   $('#txt2').expressionBuilder({
     variables: [
       {
-        variableId: 1,
+        variableId: "v1",
         name: 'FirstName'
       },
       {
-        variableId: 2,
+        variableId: "v2",
         name: 'LastName'
       }
     ],
     suggestions: "up",
-    expression: "[2] + 35"
+    expression: "[v2] + 35"
   });
 
   $('#txt').keypress(function () {
