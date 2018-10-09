@@ -1,6 +1,10 @@
 # JQuery-expression-builder
 JQuery plugin offering an interface to create arithmetic expressions
 
+JQuery Expression Builder is UI component to create a input for arithmetic expressions with functiuons and intellisense.
+
+Website: https://exp.js.org
+
 ```
     _______  __ ____         _______
    / ____/ |/ // __ \       / / ___/
