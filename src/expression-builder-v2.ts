@@ -3,7 +3,7 @@
 /// <reference path="jquery.d.ts" />
 
 interface ExpressionBuilderVariable {
-  variableId: number,
+  variableId: number | string,
   name: string,
   value?: any
 }
@@ -212,7 +212,7 @@ jQuery.fn.extend({
           return this.left.toString(parseVariables) + this.op + this.right.toString(parseVariables);
         }
       }
-      
+
       function parse(str): GraphNode {
         function extractTokens(exp: string): Array<any> {
 
@@ -258,14 +258,14 @@ jQuery.fn.extend({
               str = str.replace(/"/g, '\'');
               t = new ValueNode(JSON.parse('"' + str + '"'));
             }
-            else if (property) 
-              t = new PropertyNode(property);            
-            else if (prop) 
-              t = new PropertyNode(prop.substring(1, prop.length - 1), true);            
-            else if (token == ',') 
-              t = new CommaNode();            
-            else if (!op) 
-              throw new Error("unexpected token '" + token + "'");            
+            else if (property)
+              t = new PropertyNode(property);
+            else if (prop)
+              t = new PropertyNode(prop.substring(1, prop.length - 1), true);
+            else if (token == ',')
+              t = new CommaNode();
+            else if (!op)
+              throw new Error("unexpected token '" + token + "'");
 
             _tokens.push(t);
 
@@ -367,7 +367,7 @@ jQuery.fn.extend({
 
         var expTokens = extractTokens(str);
 
-        expTokens = handleNegativenumbers(expTokens);        
+        expTokens = handleNegativenumbers(expTokens);
 
         return wrapParenteses(expTokens);
       }
@@ -827,7 +827,7 @@ jQuery.fn.extend({
         }
 
         if (input == ']' && inVariable) {
-          let varName = getVariableById(parseInt(varId));
+          let varName = getVariableById(varId);
 
           if (varName) {
             if (isNumber(varName[0]))
@@ -853,9 +853,9 @@ jQuery.fn.extend({
       return exp;
     }
 
-    function getVariableById(varId: number): string {
+    function getVariableById(varId: number | string): string {
       for (var i = 0; i < options.variables.length; i++)
-        if (options.variables[i].variableId == varId)
+        if (options.variables[i].variableId === varId)
           return options.variables[i].name;
 
       return undefined;
@@ -1065,7 +1065,7 @@ jQuery.fn.extend({
         return expressionInput.val();
       },
 
-      getVariableById: function (variableId: number) {
+      getVariableById: function (variableId: number | string) {
         return getVariableById(variableId);
       },
 
