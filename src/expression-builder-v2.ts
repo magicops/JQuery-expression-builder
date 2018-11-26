@@ -209,7 +209,7 @@ jQuery.fn.extend({
         }
 
         toString(parseVariables: boolean = false) {
-          return this.left.toString(parseVariables) + this.op + this.right.toString(parseVariables);
+          return "(" + this.left.toString(parseVariables) + this.op + this.right.toString(parseVariables) + ")";
         }
       }
 

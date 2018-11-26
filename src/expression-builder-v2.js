@@ -166,7 +166,7 @@ jQuery.fn.extend({
                 };
                 BinaryNode.prototype.toString = function (parseVariables) {
                     if (parseVariables === void 0) { parseVariables = false; }
-                    return this.left.toString(parseVariables) + this.op + this.right.toString(parseVariables);
+                    return "(" + this.left.toString(parseVariables) + this.op + this.right.toString(parseVariables) + ")";
                 };
                 BinaryNode.operators = ["*", "/", "+", "-"];
                 return BinaryNode;
