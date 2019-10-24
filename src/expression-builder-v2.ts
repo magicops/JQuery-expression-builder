@@ -18,7 +18,8 @@ interface ExpressionBuilderOption {
   expression?: string,
   variables?: Array<ExpressionBuilderVariable>,
   functions?: any,
-  preventWrongInput?: boolean
+  preventWrongInput?: boolean,
+  variableSpecialCharacters?: string[]
 }
 
 interface ExpressionBuilder {
@@ -41,7 +42,8 @@ jQuery.fn.extend({
 
     interface ParserOption {
       funcs?: any,
-      variables?: Array<ExpressionBuilderVariable>
+      variables?: Array<ExpressionBuilderVariable>,
+      variableSpecialCharacters?: string[]
     }
 
     let parser = function (expression: string, options?: ParserOption) {
@@ -212,14 +214,16 @@ jQuery.fn.extend({
           return "(" + this.left.toString(parseVariables) + this.op + this.right.toString(parseVariables) + ")";
         }
       }
-      
+
       function parse(str): GraphNode {
         function extractTokens(exp: string): Array<any> {
 
+          var languageCharsString = options.variableSpecialCharacters.map(c => `\\${c}`).join('');
+
           //dynamically build my parsing regex:
-          var tokenParser = new RegExp([
+          var regExpStr = [
             //properties
-            /\[[a-zA-Z0-9$_]*\]+/.source,
+            `\[[a-zA-Z0-9$_${languageCharsString}]*\]+`,
 
             //numbers
             /\d+(?:\.\d*)?|\.\d+/.source,
@@ -242,7 +246,8 @@ jQuery.fn.extend({
             //remaining (non-whitespace-)chars, just in case
             //has to be at the end
             /\S/.source
-          ].map(s => "(" + s + ")").join("|"), "g");
+          ].map(s => "(" + s + ")").join("|");
+          var tokenParser = new RegExp(regExpStr, "g");
 
           var _tokens: Array<any> = [];
 
@@ -258,14 +263,14 @@ jQuery.fn.extend({
               str = str.replace(/"/g, '\'');
               t = new ValueNode(JSON.parse('"' + str + '"'));
             }
-            else if (property) 
-              t = new PropertyNode(property);            
-            else if (prop) 
-              t = new PropertyNode(prop.substring(1, prop.length - 1), true);            
-            else if (token == ',') 
-              t = new CommaNode();            
-            else if (!op) 
-              throw new Error("unexpected token '" + token + "'");            
+            else if (property)
+              t = new PropertyNode(property);
+            else if (prop)
+              t = new PropertyNode(prop.substring(1, prop.length - 1), true);
+            else if (token == ',')
+              t = new CommaNode();
+            else if (!op)
+              throw new Error("unexpected token '" + token + "'");
 
             _tokens.push(t);
 
@@ -367,7 +372,7 @@ jQuery.fn.extend({
 
         var expTokens = extractTokens(str);
 
-        expTokens = handleNegativenumbers(expTokens);        
+        expTokens = handleNegativenumbers(expTokens);
 
         return wrapParenteses(expTokens);
       }
@@ -422,7 +427,8 @@ jQuery.fn.extend({
       isPaste = false,
       parserOptions: ParserOption = {
         funcs: {},
-        variables: []
+        variables: [],
+        variableSpecialCharacters: []
       };
 
     //Initial for the first time
@@ -447,6 +453,9 @@ jQuery.fn.extend({
 
         options.functions = options.functions || [];
         expressionInput.data('funcs', options.functions);
+
+        options.variableSpecialCharacters = options.variableSpecialCharacters || [];
+        expressionInput.data('variableSpecialCharacters', options.variableSpecialCharacters);
 
         let parent = $("<div class='exp-container' exp-id='" + id + "'></div>");
 
@@ -480,11 +489,15 @@ jQuery.fn.extend({
 
         if (!options.functions)
           options.functions = expressionInput.data('funcs');
+
+        if (!options.variableSpecialCharacters)
+          options.variableSpecialCharacters = expressionInput.data('variableSpecialCharacters');
       }
 
       parserOptions = {
         funcs: options.functions,
-        variables: options.variables
+        variables: options.variables,
+        variableSpecialCharacters: options.variableSpecialCharacters
       };
     }
 
@@ -558,7 +571,7 @@ jQuery.fn.extend({
         validation();
       }
 
-      //if the expression is ready to accpet new entry (variable, date or string)
+      //if the expression is ready to accept new entry (variable, date or string)
       function acceptNewEntry(lastChar) {
         if (lastText == '')
           return true;
@@ -885,6 +898,9 @@ jQuery.fn.extend({
       if (char >= 'a' && char <= 'z' || char >= 'A' && char <= 'Z')
         return true;
 
+      if (options.variableSpecialCharacters.indexOf(char) >= 0)
+        return true;
+
       return false;
     }
 
@@ -1009,8 +1025,16 @@ jQuery.fn.extend({
       //}
 
       let selectedText = $(div).text();
+      let hasSpecialCharacter = false;
 
-      if (isNumber(selectedText[0])) {
+      for (var i = 0; i < selectedText.length; i++) {
+        if (options.variableSpecialCharacters.indexOf(selectedText[i]) >= 0) {
+          hasSpecialCharacter = true;
+          break;
+        }
+      }
+
+      if (isNumber(selectedText[0]) || hasSpecialCharacter) {
         if (text[start - 1] != '[')
           text = text.substr(0, start) + "[" + selectedText + "]" + tail.trim();
         else

@@ -14,12 +14,6 @@ let funcs = {
       throw new Error("The 'Substr' function accepts a string for the first parameter which is not a string!");
 
     return str.substr(from);
-  },
-  majid: function () {
-    return "majid";
-  },
-  test: function (x) {
-    return x * 2;
   }
 };
 
@@ -35,10 +29,6 @@ $(function () {
       {
         variableId: 2,
         name: 'Gender'
-      },
-      {
-        variableId: 3,
-        name: '1TEST'
       }
     ]
   });
