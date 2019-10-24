@@ -173,10 +173,11 @@ jQuery.fn.extend({
             }(GraphNode));
             function parse(str) {
                 function extractTokens(exp) {
+                    var languageCharsString = options.variableSpecialCharacters.map(function (c) { return "\\" + c; }).join('');
                     //dynamically build my parsing regex:
-                    var tokenParser = new RegExp([
+                    var regExpStr = [
                         //properties
-                        /\[[a-zA-Z0-9$_]*\]+/.source,
+                        "[[a-zA-Z0-9$_" + languageCharsString + "]*]+",
                         //numbers
                         /\d+(?:\.\d*)?|\.\d+/.source,
                         //string-literal
@@ -193,7 +194,8 @@ jQuery.fn.extend({
                         //remaining (non-whitespace-)chars, just in case
                         //has to be at the end
                         /\S/.source
-                    ].map(function (s) { return "(" + s + ")"; }).join("|"), "g");
+                    ].map(function (s) { return "(" + s + ")"; }).join("|");
+                    var tokenParser = new RegExp(regExpStr, "g");
                     var _tokens = [];
                     //abusing str.replace() as a RegExp.forEach
                     exp.replace(tokenParser, function (token, prop, number, str, op, property) {
@@ -330,7 +332,8 @@ jQuery.fn.extend({
             options.preventWrongInput = false;
         var expressionInput = this, lastText = '', inVariable = false, inString = false, suggestions, notificaiton, isPaste = false, parserOptions = {
             funcs: {},
-            variables: []
+            variables: [],
+            variableSpecialCharacters: []
         };
         //Initial for the first time
         initial();
@@ -348,6 +351,8 @@ jQuery.fn.extend({
                 expressionInput.data('variables', options.variables);
                 options.functions = options.functions || [];
                 expressionInput.data('funcs', options.functions);
+                options.variableSpecialCharacters = options.variableSpecialCharacters || [];
+                expressionInput.data('variableSpecialCharacters', options.variableSpecialCharacters);
                 var parent_1 = $("<div class='exp-container' exp-id='" + id + "'></div>");
                 expressionInput.parent().append(parent_1);
                 parent_1
@@ -373,10 +378,13 @@ jQuery.fn.extend({
                     options.variables = expressionInput.data('variables');
                 if (!options.functions)
                     options.functions = expressionInput.data('funcs');
+                if (!options.variableSpecialCharacters)
+                    options.variableSpecialCharacters = expressionInput.data('variableSpecialCharacters');
             }
             parserOptions = {
                 funcs: options.functions,
-                variables: options.variables
+                variables: options.variables,
+                variableSpecialCharacters: options.variableSpecialCharacters
             };
         }
         function onPaste() {
@@ -422,7 +430,7 @@ jQuery.fn.extend({
                 lastText = val;
                 validation();
             }
-            //if the expression is ready to accpet new entry (variable, date or string)
+            //if the expression is ready to accept new entry (variable, date or string)
             function acceptNewEntry(lastChar) {
                 if (lastText == '')
                     return true;
@@ -664,6 +672,8 @@ jQuery.fn.extend({
                 return true;
             if (char >= 'a' && char <= 'z' || char >= 'A' && char <= 'Z')
                 return true;
+            if (options.variableSpecialCharacters.indexOf(char) >= 0)
+                return true;
             return false;
         }
         function isNumber(char) {
@@ -756,7 +766,14 @@ jQuery.fn.extend({
             //  }
             //}
             var selectedText = $(div).text();
-            if (isNumber(selectedText[0])) {
+            var hasSpecialCharacter = false;
+            for (var i = 0; i < selectedText.length; i++) {
+                if (options.variableSpecialCharacters.indexOf(selectedText[i]) >= 0) {
+                    hasSpecialCharacter = true;
+                    break;
+                }
+            }
+            if (isNumber(selectedText[0]) || hasSpecialCharacter) {
                 if (text[start - 1] != '[')
                     text = text.substr(0, start) + "[" + selectedText + "]" + tail.trim();
                 else
