@@ -794,6 +794,7 @@ jQuery.fn.extend({
                     setCursorPosition(i + 2);
                     break;
                 }
+            expressionInput.trigger('change');
             validation();
         }
         return {
