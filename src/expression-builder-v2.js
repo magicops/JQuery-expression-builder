@@ -270,7 +270,7 @@ jQuery.fn.extend({
                             var funcParam = i + 1 == j ? new ValueNode([]) : process(tokens.slice(i + 1, j));
                             var varsLength = 1;
                             if (funcParam instanceof ValueNode && funcParam.value instanceof Array)
-                                varsLength = funcParam.value.filter(function (v) { return !(v instanceof CommaNode); }).length; //remove            
+                                varsLength = funcParam.value.filter(function (v) { return !(v instanceof CommaNode); }).length; //remove
                             var func = options.funcs[op];
                             if (!func) {
                                 throw new Error(op + " is not defined.");
@@ -499,7 +499,7 @@ jQuery.fn.extend({
                 if (input == ' ' && hasSpace)
                     return setLastText(cursor);
                 if (input == '-') {
-                    //handle negative numbers 
+                    //handle negative numbers
                     if (lastText == '' ||
                         ['(', '*', '/'].indexOf(lastChar) > -1) {
                         return returnAcceptedInput(val);
@@ -794,6 +794,7 @@ jQuery.fn.extend({
                     setCursorPosition(i + 2);
                     break;
                 }
+            expressionInput.trigger('change');
             validation();
         }
         return {
