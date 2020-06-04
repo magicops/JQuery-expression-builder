@@ -8,7 +8,7 @@ interface HTMLElement {
 }
 
 function expressionBuilder(selector: string | JQuery, options?: any) {
-    
+
     if (!selector)
         throw new Error("The selector is undefined. It should be a string selctor or a JQuery DOM element.")
 
@@ -103,7 +103,7 @@ function expressionBuilder(selector: string | JQuery, options?: any) {
             if (divs.length == 0)
                 return;
 
-            if (isUp && index == 0 || !isUp && divs.size() == index + 1)
+            if (isUp && index == 0 || !isUp && divs.length == index + 1)
                 return;
 
             index = isUp ? index - 1 : index + 1;
@@ -247,7 +247,7 @@ function expressionBuilder(selector: string | JQuery, options?: any) {
             return setLastText(cursor);
 
         if (input == '-') {
-            //handle negative numbers 
+            //handle negative numbers
             if (lastText == '' ||
                 ['(', '*', '/'].indexOf(lastChar) > -1) {
                 return returnAcceptedInput();
@@ -528,7 +528,7 @@ function expressionBuilder(selector: string | JQuery, options?: any) {
 
     function validation() {
         let result = parseInput();
-        
+
         try {
             if (result.expression == '')
                 throw new Error("expression is empty!");
