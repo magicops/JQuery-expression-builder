@@ -346,7 +346,7 @@ jQuery.fn.extend({
               let varsLength = 1;
 
               if (funcParam instanceof ValueNode && funcParam.value instanceof Array)
-                varsLength = funcParam.value.filter(v => !(v instanceof CommaNode)).length;//remove            
+                varsLength = funcParam.value.filter(v => !(v instanceof CommaNode)).length;//remove
 
               let func = options.funcs[op] as Function;
               if (!func) {
@@ -524,7 +524,7 @@ jQuery.fn.extend({
         if (divs.length == 0)
           return;
 
-        if (isUp && index == 0 || !isUp && divs.size() == index + 1)
+        if (isUp && index == 0 || !isUp && divs.length == index + 1)
           return;
 
         index = isUp ? index - 1 : index + 1;
@@ -666,7 +666,7 @@ jQuery.fn.extend({
           return setLastText(cursor);
 
         if (input == '-') {
-          //handle negative numbers 
+          //handle negative numbers
           if (lastText == '' ||
             ['(', '*', '/'].indexOf(lastChar) > -1) {
             return returnAcceptedInput(val);

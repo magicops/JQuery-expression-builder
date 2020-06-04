@@ -63,7 +63,7 @@ function expressionBuilder(selector, options) {
             var index = parseInt(suggestions.attr('data-index')), divs = suggestions.find('div.exp-suggestion-item'), isUp = e.key == 'Up' || e.key == 'ArrowUp';
             if (divs.length == 0)
                 return;
-            if (isUp && index == 0 || !isUp && divs.size() == index + 1)
+            if (isUp && index == 0 || !isUp && divs.length == index + 1)
                 return;
             index = isUp ? index - 1 : index + 1;
             suggestions.attr('data-index', index);
@@ -159,7 +159,7 @@ function expressionBuilder(selector, options) {
         if (input == ' ' && hasSpace)
             return setLastText(cursor);
         if (input == '-') {
-            //handle negative numbers 
+            //handle negative numbers
             if (lastText == '' ||
                 ['(', '*', '/'].indexOf(lastChar) > -1) {
                 return returnAcceptedInput();
