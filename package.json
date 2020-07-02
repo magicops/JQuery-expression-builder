@@ -1,12 +1,12 @@
 {
   "name": "jquery-expression-builder",
-  "version": "0.1.1",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "version": "0.1.2",
+  "main": "dist/expression-builder-v2.js",
+  "types": "dist/expression-builder-v2.d.ts",
   "dependencies": {},
   "devDependencies": {
-    "typescript": "3.8.3",
-    "@types/jquery": "3.5.0"
+    "@types/jquery": "3.5.0",
+    "typescript": "3.8.3"
   },
   "peerDependencies": {
     "jQuery": "3.5.1"
