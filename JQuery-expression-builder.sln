@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29519.87
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JQuery-expression-builder", "JQuery-expression-builder.csproj", "{892BB5C9-76F9-4636-9E20-0688B28B6EAA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{892BB5C9-76F9-4636-9E20-0688B28B6EAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{892BB5C9-76F9-4636-9E20-0688B28B6EAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{892BB5C9-76F9-4636-9E20-0688B28B6EAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{892BB5C9-76F9-4636-9E20-0688B28B6EAA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {86D996EA-93B6-46E6-AF0B-032244FDD780}
+	EndGlobalSection
+EndGlobal

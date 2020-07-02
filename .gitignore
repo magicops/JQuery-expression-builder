@@ -3,6 +3,6 @@
 /Properties
 
 *.user
-*.config
 /tests
 /.vs
+/packages/
