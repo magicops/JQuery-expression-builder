@@ -1,6 +1,4 @@
-﻿//Author: Majid Akbari
-
-/// <reference path="jquery.d.ts" />
+//Author: Majid Akbari
 
 interface HTMLElement {
     selectionStart: any,

@@ -1,0 +1,25 @@
+{
+  "name": "jquery-expression-builder",
+  "version": "0.1.1",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "3.8.3",
+    "@types/jquery": "3.5.0"
+  },
+  "peerDependencies": {
+    "jQuery": "3.5.1"
+  },
+  "scripts": {
+    "prepack": "yarn build",
+    "build": "tsc",
+    "watch": "tsc -w"
+  },
+  "author": "magicops",
+  "license": "MIT",
+  "homepage": "https://github.com/magicops/JQuery-expression-builder#readme",
+  "files": [
+    "dist/**/*"
+  ]
+}

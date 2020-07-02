@@ -1,16 +1,9 @@
 //Author: Majid Akbari
 
-/// <reference path="jquery.d.ts" />
-
 interface ExpressionBuilderVariable {
   variableId: number | string,
   name: string,
   value?: any
-}
-
-interface HTMLElement {
-  selectionStart: any,
-  setSelectionRange: any;
 }
 
 interface ExpressionBuilderOption {
@@ -24,7 +17,7 @@ interface ExpressionBuilderOption {
 
 interface ExpressionBuilder {
   getExpression(): string,
-  setExpression(expression: string): void,
+  setExpression(expression: string | number | string[] | undefined): void,
   isValid(): boolean,
   parseExpression(expression: string): string,
   getInput(): string,

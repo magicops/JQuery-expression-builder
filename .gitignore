@@ -6,3 +6,6 @@
 /tests
 /.vs
 /packages/
+/node_modules/
+/.idea/
+/dist/

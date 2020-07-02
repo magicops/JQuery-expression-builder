@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "module": "commonjs",
+    "declaration": true,
+    "outDir": "./dist",
+    "strict": false,
+    "skipLibCheck": true,
+    "esModuleInterop": true
+  },
+  "include": ["src/expression-builder-v2.ts", "src/expression-builder.css"],
+  "exclude": ["node_modules", "**/__tests__/*", "dist/**/*"]
+}

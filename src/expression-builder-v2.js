@@ -12,7 +12,6 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-/// <reference path="jquery.d.ts" />
 jQuery.fn.extend({
     expressionBuilder: function (options) {
         var parser = function (expression, options) {
