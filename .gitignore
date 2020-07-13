@@ -3,6 +3,10 @@
 /Properties
 
 *.user
-*.config
 /tests
 /.vs
+/packages/
+/node_modules/
+/.idea/
+/dist/
+/yarn-error.log

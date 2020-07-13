@@ -6,6 +6,17 @@ JQuery Expression Builder is UI component to create a input for arithmetic expre
 Website: https://exp.js.org
 CodePen: https://codepen.io/magicops/pen/yRgQwV/
 
+
+## Install
+
+    yarn add jquery-expression-builder
+    
+Remember you should have jQuery installed in a project as well.
+
+## Publish to npm
+
+    yarn publish
+    
 ```
     _______  __ ____         _______
    / ____/ |/ // __ \       / / ___/
