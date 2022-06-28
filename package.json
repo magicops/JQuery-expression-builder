@@ -9,7 +9,7 @@
     "typescript": "3.8.3"
   },
   "peerDependencies": {
-    "jQuery": "3.5.1"
+    "jquery": "3.5.1"
   },
   "scripts": {
     "prepack": "yarn build",
