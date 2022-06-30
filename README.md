@@ -1,4 +1,7 @@
 # JQuery-expression-builder
+
+**I'm planning to create a pure javascript npm package out of this library so all javascript projects can use it. Please contact me if you want to contribute and help me on this journey.**
+
 JQuery plugin offering an interface to create arithmetic expressions
 
 JQuery Expression Builder is UI component to create a input for arithmetic expressions with functiuons and intellisense.
